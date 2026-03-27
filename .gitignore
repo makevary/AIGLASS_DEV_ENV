@@ -84,3 +84,7 @@ sysdrv/source/uboot/u-boot/tools/common/
 sysdrv/source/uboot/u-boot/tools/lib/
 
 sysdrv/source/objs_kernel/
+
+.rsync-exclude
+
+prefill_oem_from_internal.sh
