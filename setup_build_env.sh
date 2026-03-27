@@ -17,6 +17,7 @@ PACKAGES=(
   libncurses5:i386
   python-is-python3
   libssl-dev
+  device-tree-compiler
   cmake
 )
 
