@@ -8,6 +8,7 @@ project/app/ipcweb/build/
 project/app/rkipc/build/
 project/app/ipcweb/build/
 sysdrv/out/
+sysdrv/source/objs_kernel/
 sysdrv/source/busybox
 sysdrv/tools/board/android-tools/android-tools
 sysdrv/tools/board/e2fsprogs/e2fsprogs-1.43.9
@@ -33,6 +34,8 @@ media/sysutils/examples/*.o
 media/sysutils/src/*.o
 media/samples/example/common/lib/*.a
 .public-rsync-*.txt
+.rsync-exclude
+prefill_oem_from_internal.sh
 sync_to_public.sh
 
 # U-Boot in-tree build artifacts
@@ -66,7 +69,11 @@ sysdrv/source/uboot/u-boot/scripts/dtc/dtc-lexer.lex.*
 sysdrv/source/uboot/u-boot/scripts/dtc/dtc-parser.tab.*
 sysdrv/source/uboot/u-boot/scripts/kconfig/conf
 sysdrv/source/uboot/u-boot/scripts/kconfig/conf.o
-sysdrv/source/uboot/u-boot/scripts/kconfig/zconf.*
+# keep parser sources and *_shipped files for public sync; ignore generated outputs only
+sysdrv/source/uboot/u-boot/scripts/kconfig/zconf.hash.c
+sysdrv/source/uboot/u-boot/scripts/kconfig/zconf.lex.c
+sysdrv/source/uboot/u-boot/scripts/kconfig/zconf.tab.c
+sysdrv/source/uboot/u-boot/scripts/kconfig/zconf.tab.o
 sysdrv/source/uboot/u-boot/tools/dumpimage
 sysdrv/source/uboot/u-boot/tools/fdtgrep
 sysdrv/source/uboot/u-boot/tools/gen_eth_addr
@@ -82,9 +89,3 @@ sysdrv/source/uboot/u-boot/**/u-boot.cfg
 sysdrv/source/uboot/u-boot/**/u-boot-spl.lds
 sysdrv/source/uboot/u-boot/tools/common/
 sysdrv/source/uboot/u-boot/tools/lib/
-
-sysdrv/source/objs_kernel/
-
-.rsync-exclude
-
-prefill_oem_from_internal.sh
