@@ -1,0 +1,12 @@
+commit c41eb08d34256c326ac7800a10566905701e4bf7
+Author: Yandong Lin <yandong.lin@rock-chips.com>
+Date:   Sat Oct 12 17:15:09 2024 +0800
+
+    fix[h264e_pps]: add scaling list mode check for profile
+    
+    Not support scaling_mode for profile < hight profile.
+    redmine issue:
+    https://redmine.rock-chips.com/issues/512239
+    
+    Signed-off-by: Yandong Lin <yandong.lin@rock-chips.com>
+    Change-Id: I7e4bd1778d4cd0a7d0f6c9bf31adc1e2e7374699

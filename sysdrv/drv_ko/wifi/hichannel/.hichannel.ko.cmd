@@ -1,0 +1,1 @@
+cmd_/opt/aiglass_dev_env/sysdrv/drv_ko/wifi/hichannel/hichannel.ko := arm-rockchip831-linux-uclibcgnueabihf-ld -r -EL -z noexecstack --build-id=sha1  -T scripts/module.lds -o /opt/aiglass_dev_env/sysdrv/drv_ko/wifi/hichannel/hichannel.ko /opt/aiglass_dev_env/sysdrv/drv_ko/wifi/hichannel/hichannel.o /opt/aiglass_dev_env/sysdrv/drv_ko/wifi/hichannel/hichannel.mod.o;  true

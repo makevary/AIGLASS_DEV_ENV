@@ -1,0 +1,72 @@
+From 972a3a192a5da301ebae8e5012f09bce47b65c5b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Date: Thu, 20 Apr 2023 14:13:17 +0200
+Subject: [PATCH 1/2] build system: Make it possible to build with 64bit time_t
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+On most 32bit architectures time_t (and a few other time related types)
+are a signed 32bit wide integer type.
+As a consequence they can only represent dates between
+
+	Fri Dec 13 08:45:52 PM UTC 1901
+
+(-0x80000000 seconds before Jan 1 1970) and
+
+	Tue Jan 19 03:14:07 AM UTC 2038
+
+(0x7fffffff seconds after Jan 1 1970). Given that some machines that are
+built today have an expected lifetime of >15 years, this needs to be
+extended. To to that, define the cpp symbol _TIME_BITS to 64 which
+results in some magic in glibc to make time_t (and the few other time
+related types) 64 bit wide.
+
+This new switch CONFIG_TIME64 is in the spirit of CONFIG_LFS and only
+expected to have the expected effect with glibc. On musl for examples
+time_t already defaults to 64bit wide types.
+
+Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
+Signed-off-by: Weiwen Chen <cww@rock-chips.com>
+---
+ Config.in      | 10 ++++++++++
+ Makefile.flags |  1 +
+ 2 files changed, 11 insertions(+)
+
+diff --git a/Config.in b/Config.in
+index a98a8b1..214eba5 100644
+--- a/Config.in
++++ b/Config.in
+@@ -108,6 +108,16 @@ config LFS
+ 	programs that can benefit from large file support include dd, gzip,
+ 	cp, mount, tar.
+ 
++config TIME64
++	bool "Support 64bit wide time types"
++	default y
++	depends on LFS
++	help
++	Make times later than 2038 representable for several libc syscalls
++	(stat, clk_gettime etc.). Note this switch is specific to glibc and has
++	no effect on platforms that already use 64bit wide time types (i.e. all
++	64bit archs and some selected 32bit archs (currently riscv and x32)).
++
+ config PAM
+ 	bool "Support PAM (Pluggable Authentication Modules)"
+ 	default n
+diff --git a/Makefile.flags b/Makefile.flags
+index 1cec5ba..e4cd658 100644
+--- a/Makefile.flags
++++ b/Makefile.flags
+@@ -15,6 +15,7 @@ CPPFLAGS += \
+ 	-include include/autoconf.h \
+ 	-D_GNU_SOURCE -DNDEBUG \
+ 	$(if $(CONFIG_LFS),-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64) \
++	$(if $(CONFIG_TIME64),-D_TIME_BITS=64) \
+ 	-DBB_VER=$(squote)$(quote)$(BB_VER)$(quote)$(squote)
+ 
+ CFLAGS += $(call cc-option,-Wall,)
+-- 
+2.23.0-rc1
+

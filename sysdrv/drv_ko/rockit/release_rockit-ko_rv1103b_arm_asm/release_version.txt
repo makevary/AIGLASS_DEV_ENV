@@ -1,0 +1,8 @@
+commit 1c41df617a42efb36cf235869f2aae11b4b63343
+Author: ChuanHu Sun <aaron.sun@rock-chips.com>
+Date:   Sat Oct 12 17:38:24 2024 +0800
+
+    mcu: fix mcu auto start in suspend/resume
+    
+    Signed-off-by: ChuanHu Sun <aaron.sun@rock-chips.com>
+    Change-Id: I9215b5d5aaba085648d961e3edcb2a7e53835532

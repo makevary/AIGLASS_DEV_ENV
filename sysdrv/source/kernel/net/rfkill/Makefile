@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# Makefile for the RF switch subsystem.
+#
+
+rfkill-y			+= core.o
+rfkill-$(CONFIG_RFKILL_INPUT)	+= input.o
+obj-y		+= rfkill.o
+obj-y	+= rfkill-gpio.o
+rfkill-rk-y			+= rfkill-wlan.o rfkill-bt.o
+obj-y		+= rfkill-rk.o

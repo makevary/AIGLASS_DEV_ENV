@@ -1,0 +1,46 @@
+From d95b27659bbe6aa539586a1fa975c7933bb4e3d2 Mon Sep 17 00:00:00 2001
+From: Weiwen Chen <cww@rock-chips.com>
+Date: Fri, 23 Aug 2024 17:51:01 +0800
+Subject: [PATCH] spi nor: support 4KB erase block size with experimental
+
+Signed-off-by: Weiwen Chen <cww@rock-chips.com>
+---
+ jffsX-utils/mkfs.jffs2.c | 5 +++++
+ jffsX-utils/sumtool.c    | 5 +++++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/jffsX-utils/mkfs.jffs2.c b/jffsX-utils/mkfs.jffs2.c
+index 9aa6c39..3cec529 100644
+--- a/jffsX-utils/mkfs.jffs2.c
++++ b/jffsX-utils/mkfs.jffs2.c
+@@ -1668,6 +1668,11 @@ int main(int argc, char **argv)
+ 
+ 						  /* If it's less than 8KiB, they're not allowed */
+ 						  if (erase_block_size < 0x2000) {
++							  if (erase_block_size == 0x1000) {
++								  warnmsg("Set Erase size to 4KB with Experimental.\n");
++								  erase_block_size = 0x1000;
++								  break;
++							  }
+ 							  fprintf(stderr, "Erase size 0x%x too small. Increasing to 8KiB minimum\n",
+ 									  erase_block_size);
+ 							  erase_block_size = 0x2000;
+diff --git a/jffsX-utils/sumtool.c b/jffsX-utils/sumtool.c
+index 68268a9..836b426 100644
+--- a/jffsX-utils/sumtool.c
++++ b/jffsX-utils/sumtool.c
+@@ -194,6 +194,11 @@ static void process_options (int argc, char **argv)
+ 
+ 						  /* If it's less than 8KiB, they're not allowed */
+ 						  if (erase_block_size < 0x2000) {
++							  if (erase_block_size == 0x1000) {
++								  warnmsg("Set Erase size to 4KB with Experimental.\n");
++								  erase_block_size = 0x1000;
++								  break;
++							  }
+ 							  warnmsg("Erase size 0x%x too small. Increasing to 8KiB minimum\n",
+ 									erase_block_size);
+ 							  erase_block_size = 0x2000;
+-- 
+2.23.0-rc1
+

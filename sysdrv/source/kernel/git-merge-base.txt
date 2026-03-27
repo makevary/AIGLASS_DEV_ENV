@@ -1,0 +1,14 @@
+remote url:
+rk	ssh://git@www.rockchip.com.cn/linux/rk/kernel (fetch)
+rk	ssh://git@www.rockchip.com.cn/linux/rk/kernel (push)
+remote branch:
+  m/master
+  rk/stable-5.10-rv1103b
+commit d584b118b04e1f993acaaac4e3f8e099daa36b76
+Author: Ye Zhang <ye.zhang@rock-chips.com>
+Date:   Tue Feb 11 10:48:29 2025 +0800
+
+    thermal: rockchip: change code table for rv1103b
+    
+    Signed-off-by: Ye Zhang <ye.zhang@rock-chips.com>
+    Change-Id: I93ba4ac058d784d31b72f698777e8bda78d92454

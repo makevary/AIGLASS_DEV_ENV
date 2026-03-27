@@ -1,0 +1,300 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2024 Rockchip Electronics Co., Ltd.
+ */
+
+/dts-v1/;
+
+#include "rv1103b.dtsi"
+#include "rv1103b-evb.dtsi"
+#include "rv1103b-evb-cam.dtsi"
+
+/ {
+	model = "Rockchip RV1103B EVB1 V10 Board";
+	compatible = "rockchip,rv1103b-evb1-v10", "rockchip,rv1103b";
+
+	sdio_pwrseq: sdio-pwrseq {
+		compatible = "mmc-pwrseq-simple";
+		pinctrl-names = "default";
+		pinctrl-0 = <&wifi_enable_h>;
+		/*
+		 * On the module itself this is one of these (depending
+		 * on the actual card populated):
+		 * - SDIO_RESET_L_WL_REG_ON
+		 * - PDN (power down when low)
+		 */
+		post-power-on-delay-ms = <300>;
+		reset-gpios = <&gpio2 RK_PB2 GPIO_ACTIVE_LOW>;
+	};
+
+//	acodec_sound: acodec-sound {
+ //                compatible = "simple-audio-card";
+//                 simple-audio-card,name = "rv-acodec";
+//                 simple-audio-card,format = "i2s";
+ //                simple-audio-card,mclk-fs = <256>;
+ //                simple-audio-card,cpu {
+ //                        sound-dai = <&i2s0_8ch>;
+ //                };
+ //                simple-audio-card,codec {
+ //                        sound-dai = <&acodec>;
+ //                };
+ //     };
+
+	vcc3v3_sd: vcc3v3-sd {
+		compatible = "regulator-fixed";
+		gpio = <&gpio0 RK_PA4 GPIO_ACTIVE_LOW>;
+		regulator-name = "vcc3v3_sd";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&sdmmc_pwren>;
+		vin-supply = <&vcc_3v3>;
+	};
+
+	vccio_sd: vccio-sd {
+		compatible = "regulator-gpio";
+		regulator-name = "vccio_sd";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <3300000>;
+		gpios = <&gpio0 RK_PA3 GPIO_ACTIVE_HIGH>;
+		states = <3300000 1
+			  1800000 0>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&sdmmc_volt>;
+	};
+
+	wireless_wlan: wireless-wlan {
+		compatible = "wlan-platdata";
+		wifi_chip_type = "rtl8723ds";
+		pinctrl-names = "default";
+//		pinctrl-0 = <&wifi_host_wake_irq>;
+		WIFI,host_wake_irq = <&gpio0 RK_PB5 GPIO_ACTIVE_HIGH>;
+		status = "okay";
+	};
+
+	wireless_bluetooth: wireless-bluetooth {
+                  compatible = "bluetooth-platdata";
+                  uart_rts_gpios = <&gpio0 RK_PB2 GPIO_ACTIVE_LOW>;
+                  pinctrl-names = "default", "rts_gpio";
+                  pinctrl-0 = <&uart2m0_rtsn_pins>;
+     //           pinctrl-1 = <&uart2_rts_gpio>;
+      //          BT,wake_gpio     = <&gpio1 RK_PC5 GPIO_ACTIVE_HIGH>; //host wake bt
+                  BT,wake_host_irq = <&gpio1 RK_PC6 GPIO_ACTIVE_HIGH>;  //bt wake host
+                  status = "okay";
+       };
+	
+	gpio_keys: gpio_keys {
+                  compatible = "gpio-keys";
+                  #address-cells = <1>;
+                  #size-cells = <0>;
+ 		  autorepeat; 
+                  pinctrl-names = "default";
+                  pinctrl-0 = <&pwr_key>;
+  
+                  power_key {
+                          label = "GPIO Key Power";
+			  linux,code = <KEY_POWER>;
+                          gpios = <&gpio0 RK_PA1 GPIO_ACTIVE_HIGH>;
+			  wakeup-source;
+                          debounce-interval = <100>; 
+		  };
+          };
+
+	  bt_codec: bt-sco {
+                  compatible = "linux,bt-sco";
+                  #sound-dai-cells = <0>;
+         };
+
+};
+
+&pinctrl {
+
+	sdio-pwrseq {
+		wifi_enable_h: wifi-enable-h {
+			rockchip,pins = <2 RK_PB2 RK_FUNC_GPIO &pcfg_pull_none>; };
+	};
+
+	sdmmc {
+		/omit-if-no-ref/
+		sdmmc_pwren: sdmmc-pwren {
+			rockchip,pins = <0 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+
+		/omit-if-no-ref/
+		sdmmc_volt: sdmmc-volt {
+			rockchip,pins = <0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+
+		sdmmc0_det: sdmmc0-det {
+			rockchip,pins = <1 RK_PA6 1 &pcfg_pull_down>;
+		};
+
+	};
+
+//	wireless-bluetooth {
+// 	     	uart2_rts_gpio: uart2-gpios {
+//        		rockchip,pins = <2 RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>;
+//      		};
+//    	};
+
+//	wireless-wifi {
+//		wifi_host_wake_irq: wifi_wake_irq {
+//			rockchip,pins = <0 RK_PB5 RK_FUNC_GPIO &pcfg_pull_none>;
+//		};
+//	};
+
+	buttons {
+                pwr_key: pwr-key {
+                         rockchip,pins = <0 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
+                };
+        };
+};
+
+&uart2 {
+        status = "okay";
+        pinctrl-names = "default";
+        pinctrl-0 = <&uart2m0_xfer_pins &uart2m0_ctsn_pins &uart2m0_rtsn_pins>;
+};
+
+&emmc {
+	no-sdio;
+	no-sd;
+	bus-width = <4>;
+	cap-mmc-highspeed;
+	non-removable;
+	mmc-hs200-1_8v;
+	status = "okay";
+};
+
+//&i2s0_8ch {
+//          #sound-dai-cells = <0>;
+//          status = "okay";
+//};
+ 
+&acodec {
+         #sound-dai-cells = <0>;
+         pa-ctl-gpios = <&gpio1 RK_PA1 GPIO_ACTIVE_HIGH>;
+         status = "okay";
+};
+
+//&fspi0 {
+//	status = "okay";
+//
+//	flash@0 {
+//		compatible = "spi-nand";
+//		reg = <0>;
+//		spi-max-frequency = <75000000>;
+//		spi-rx-bus-width = <4>;
+//		spi-tx-bus-width = <1>;
+//	};
+//};
+
+&sdmmc0 {
+        max-frequency = <50000000>;
+        bus-width = <4>;
+        cap-sd-highspeed;
+        cap-sdio-irq;
+        keep-power-in-suspend;
+        non-removable;
+        rockchip,default-sample-phase = <90>;
+        // no-sd;
+        // no-mmc;
+        supports-sdio;
+        mmc-pwrseq = <&sdio_pwrseq>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&sdmmc0_clk_pins &sdmmc0_cmd_pins &sdmmc0_bus4_pins &sdmmc0_det>;
+        status = "okay";
+};
+
+&sdmmc1 {
+	max-frequency = <150000000>;
+	no-sd;
+	no-mmc;
+	bus-width = <4>;
+	cap-sd-highspeed;
+	cap-sdio-irq;
+	keep-power-in-suspend;
+	mmc-pwrseq = <&sdio_pwrseq>;
+	non-removable;
+	pinctrl-names = "default";
+	pinctrl-0 = <&sdmmc1_cmd_pins &sdmmc1_clk_pins &sdmmc1_bus4_pins>;
+	status = "disabled";
+};
+
+&spi0 {
+     status = "okay";
+     #address-cells = <1>;
+     #size-cells = <0>;
+ 
+     spidev@0 {
+         compatible = "rohm,dh2228fv";
+         reg = <0>;
+         spi-max-frequency = <50000000>; // 50MHz
+         spi-cpol; // 时钟极性为高电平
+         spi-cpha; // 时钟相位为第二个边沿采样
+         //spi-cs-high = <0>; // 片选信号为低电平有效
+         status = "okay";
+     };
+};
+
+
+&rockchip_suspend {
+          status = "okay";
+
+          rockchip,sleep-io-config = <
+                  /* pmic_sleep */
+                  (0
+                  | RKPM_IO_CFG_IOMUX_GPIO
+                  | RKPM_IO_CFG_GPIO_DIR_INPUT
+                  | RKPM_IO_CFG_PULL_DOWN
+                  | RKPM_IO_CFG_ID(0)
+                  )
+                  (0
+                  | RKPM_IO_CFG_IOMUX_GPIO
+                  | RKPM_IO_CFG_GPIO_DIR_INPUT
+                  | RKPM_IO_CFG_PULL_NONE
+                  | RKPM_IO_CFG_ID(1)
+                  )
+                  (0
+                  | RKPM_IO_CFG_IOMUX_GPIO
+                  | RKPM_IO_CFG_GPIO_DIR_INPUT
+                  | RKPM_IO_CFG_PULL_NONE
+                  | RKPM_IO_CFG_ID(2)
+                  )
+                  (0
+                  | RKPM_IO_CFG_IOMUX(1)
+                  | RKPM_IO_CFG_PULL_NONE
+                  | RKPM_IO_CFG_ID(3)
+                  )
+                  (0
+                  | RKPM_IO_CFG_IOMUX_GPIO
+                  | RKPM_IO_CFG_GPIO_DIR_INPUT
+                  | RKPM_IO_CFG_PULL_UP
+                  | RKPM_IO_CFG_ID(4)
+                  )
+                  (0
+                  | RKPM_IO_CFG_IOMUX_GPIO
+                  | RKPM_IO_CFG_GPIO_DIR_INPUT
+		  | RKPM_IO_CFG_PULL_DOWN
+                  | RKPM_IO_CFG_ID(5)
+                  )
+                  (0
+                  | RKPM_IO_CFG_IOMUX_GPIO
+                  | RKPM_IO_CFG_GPIO_DIR_INPUT
+                  | RKPM_IO_CFG_PULL_DOWN
+                  | RKPM_IO_CFG_ID(6)
+                 )
+         >;
+
+	 rockchip,sleep-mode-config = <
+		(0
+		| RKPM_SLP_32K_EXT
+		)
+	>;
+	
+};
+
+
+
+
+

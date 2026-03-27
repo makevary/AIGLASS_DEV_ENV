@@ -1,0 +1,68 @@
+From dbd7b59cb941a863c2a126a398809601ee2fd945 Mon Sep 17 00:00:00 2001
+From: Su Yuefu <yuefu.su@rock-chips.com>
+Date: Mon, 24 Mar 2025 10:44:31 +0800
+Subject: [PATCH 2/2] TESTONLY: add support for imx219
+
+Signed-off-by: Su Yuefu <yuefu.su@rock-chips.com>
+---
+ arch/arm/boot/dts/rv1103b-evb-cam.dtsi | 27 ++++++++++++++++++++++++++
+ arch/arm/configs/rv1103b_defconfig     |  1 +
+ 2 files changed, 28 insertions(+)
+
+diff --git a/arch/arm/boot/dts/rv1103b-evb-cam.dtsi b/arch/arm/boot/dts/rv1103b-evb-cam.dtsi
+index 0aa6ce907..f0dfe3768 100644
+--- a/arch/arm/boot/dts/rv1103b-evb-cam.dtsi
++++ b/arch/arm/boot/dts/rv1103b-evb-cam.dtsi
+@@ -80,6 +80,11 @@ csi_dphy_input11: endpoint@b {
+ 				remote-endpoint = <&sc4336p_out>;
+ 				data-lanes = <1 2>;
+ 			};
++			csi_dphy_input12: endpoint@c {
++				reg = <0xc>;
++				remote-endpoint = <&imx219_out>;
++				data-lanes = <1 2>;
++			};
+ 		};
+ 
+ 		port@1 {
+@@ -364,6 +369,28 @@ sc4336p_out: endpoint {
+ 			};
+ 		};
+ 	};
++
++	imx219: imx219@10 {
++		compatible = "sony,imx219";
++		status = "okay";
++		reg = <0x10>;
++		clocks = <&cru CLK_MIPI0_OUT2IO>;
++		clock-names = "xvclk";
++		reset-gpios = <&gpio1 RK_PB6 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&cam_clk0_pins>;
++		rockchip,camera-module-index = <0>;
++		rockchip,camera-module-facing = "back";
++		rockchip,camera-module-name = "default";
++		rockchip,camera-module-lens-name = "default";
++
++		port {
++			imx219_out: endpoint {
++				remote-endpoint = <&csi_dphy_input12>;
++				data-lanes = <1 2>;
++			};
++		};
++	};
+ };
+ 
+ &mipi0_csi2 {
+diff --git a/arch/arm/configs/rv1103b_defconfig b/arch/arm/configs/rv1103b_defconfig
+index 2bfde6e6e..0e5cd80f3 100644
+--- a/arch/arm/configs/rv1103b_defconfig
++++ b/arch/arm/configs/rv1103b_defconfig
+@@ -229,3 +229,4 @@ CONFIG_DEBUG_INFO=y
+ # CONFIG_SCHED_DEBUG is not set
+ # CONFIG_FTRACE is not set
+ # CONFIG_RUNTIME_TESTING_MENU is not set
++CONFIG_VIDEO_IMX219=m
+-- 
+2.34.1
+

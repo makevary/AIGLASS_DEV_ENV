@@ -1,0 +1,1 @@
+cmd_/opt/aiglass_dev_env/sysdrv/drv_ko/wifi/hichannel/modules.order := {   echo /opt/aiglass_dev_env/sysdrv/drv_ko/wifi/hichannel/hichannel.ko; :; } | awk '!x[$$0]++' - > /opt/aiglass_dev_env/sysdrv/drv_ko/wifi/hichannel/modules.order

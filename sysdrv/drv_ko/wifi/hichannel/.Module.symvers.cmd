@@ -1,0 +1,1 @@
+cmd_/opt/aiglass_dev_env/sysdrv/drv_ko/wifi/hichannel/Module.symvers := sed 's/\.ko$$/\.o/' /opt/aiglass_dev_env/sysdrv/drv_ko/wifi/hichannel/modules.order | scripts/mod/modpost     -o /opt/aiglass_dev_env/sysdrv/drv_ko/wifi/hichannel/Module.symvers -e -i Module.symvers   -T -
