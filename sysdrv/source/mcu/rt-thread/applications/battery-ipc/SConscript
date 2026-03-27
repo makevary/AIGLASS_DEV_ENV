@@ -1,0 +1,17 @@
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+
+cwd     = GetCurrentDir()
+src     = Glob('*.c')
+CPPPATH = [cwd, str(Dir('#')), 'include', 'include/iq_parser_v2', 'include/common', 'include/make_meta', 'include/fast_2a', 'include/isp', 'include/algos']
+LIBS    = ['lib/libfastae_gcc.a','lib/libfastawb_gcc.a']
+LIBPATH = [GetCurrentDir()]
+if GetDepend(['SOC_RV1106']):
+    CPPDEFINES = ['ISP_HW_V32']
+if GetDepend(['SOC_RV1103B']):
+    CPPDEFINES = ['ISP_HW_V33'] + ['USE_NEWSTRUCT']
+
+group = DefineGroup('battery-ipc', src, depend = ['RT_USING_RK_BATTERY_IPC'], CPPPATH = CPPPATH, LIBS = LIBS, LIBPATH = LIBPATH, CPPDEFINES = CPPDEFINES)
+
+Return('group')

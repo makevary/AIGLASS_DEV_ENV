@@ -1,0 +1,5 @@
+# 1 "/opt/aiglass_dev_env/sysdrv/source/mcu/rt-thread/components/libc/compilers/common/gmtime_r.c"
+# 1 "/opt/aiglass_dev_env/sysdrv/source/mcu/rt-thread/bsp/rockchip/rv1103b-mcu//"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "/opt/aiglass_dev_env/sysdrv/source/mcu/rt-thread/components/libc/compilers/common/gmtime_r.c"
