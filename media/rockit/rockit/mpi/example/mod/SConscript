@@ -1,0 +1,27 @@
+from building import *
+Import("SOC")
+
+cwd     = GetCurrentDir()
+src     = Split('''
+test_mpi_mb.c
+test_mpi_sys.c
+rt_kernel_main.c
+''')
+
+if GetDepend('RT_USING_ROCKIT_VI'):
+    src += ['test_mpi_vi.cpp']
+
+CPPPATH = [cwd]
+CPPPATH += ["../../sdk/include"]
+CPPPATH += ["../include"]
+
+CPPDEFINES = ['OS_RTT']
+libs = ['librockit']
+libpath = [cwd + '/../../sdk/lib/arm/rk3308/rtt']
+if SOC == 'RK3308':
+    CPPPATH += ["../../sdk/lib/arm/rk3308"]
+
+
+group = DefineGroup('rockit', src, depend = ['RT_USING_ROCKIT'], CPPPATH = CPPPATH, CPPDEFINES=CPPDEFINES, LIBS = libs, LIBPATH = libpath)
+
+Return('group')

@@ -1,0 +1,1 @@
+../../arm-rockchip831-linux-uclibcgnueabihf/sysroot/lib/libitm.spec

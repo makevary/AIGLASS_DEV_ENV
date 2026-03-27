@@ -1,0 +1,31 @@
+v1.5.0
+1、完善模型标定说明文档
+   添加拍图注意事项和错误示例
+   添加角点提取功能说明
+2、完善产线标定说明文档
+   添加拍图注意事项和错误示例
+3、算法库增加角点提取功能
+4、优化产线标定效果
+5、添加log打印信息
+v1.5.1
+1、整理文件目录结构
+2、提供demo
+v1.5.6
+1、更新RV1103B支持
+AVS tool工具包的主要文件结构组成：
+
+├─demo							// 如何调用AVS tool动态库文件的示例代码
+│
+├─include						// AVS tool的API接口文件
+│
+├─lib							// AVS tool动态库文件
+│  ├─Linux
+│  └─Windows
+│
+└─Tool_exe						// 预先编译好的工具与测试用的sample数据，供用户选择使用，详细说明请查看Tool_exe文件夹下的readme.txt文件
+    ├─sample_data
+    ├─Tool_exe_Linux
+    └─Tool_exe_Windows
+
+
+文档请参考《Rockchip_Developer_Guide_RK3588_AVS_CN.pdf》中的4.3.1 模型标定。

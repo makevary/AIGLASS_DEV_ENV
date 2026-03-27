@@ -1,0 +1,57 @@
+From e1f2c35a7f729174632e3e755040ae54e9ac3ee5 Mon Sep 17 00:00:00 2001
+From: Weiwen Chen <cww@rock-chips.com>
+Date: Tue, 20 Aug 2024 11:44:10 +0800
+Subject: [PATCH] utils: remove unused tools
+
+Signed-off-by: Weiwen Chen <cww@rock-chips.com>
+---
+ utils/Makefile.am | 10 +---------
+ utils/Makefile.in |  8 ++++----
+ 2 files changed, 5 insertions(+), 13 deletions(-)
+
+diff --git a/utils/Makefile.am b/utils/Makefile.am
+index 9c29926..8880da8 100644
+--- a/utils/Makefile.am
++++ b/utils/Makefile.am
+@@ -1,18 +1,10 @@
+ SUBDIRS = \
+ 	libv4l2util \
+ 	libmedia_dev \
+-	ivtv-ctl \
+-	ir-ctl \
+-	cx18-ctl \
+-	keytable \
+ 	media-ctl \
+ 	v4l2-ctl \
+ 	v4l2-dbg \
+-	v4l2-sysfs-path \
+-	cec-ctl \
+-	cec-compliance \
+-	cec-follower \
+-	rds-ctl
++	v4l2-sysfs-path
+ 
+ if WITH_LIBDVBV5
+ SUBDIRS += \
+diff --git a/utils/Makefile.in b/utils/Makefile.in
+index 1172417..866e884 100644
+--- a/utils/Makefile.in
++++ b/utils/Makefile.in
+@@ -161,10 +161,10 @@ am__define_uniq_tagged_files = \
+   done | $(am__uniquify_input)`
+ ETAGS = etags
+ CTAGS = ctags
+-DIST_SUBDIRS = libv4l2util libmedia_dev ivtv-ctl ir-ctl cx18-ctl \
+-	keytable media-ctl v4l2-compliance v4l2-ctl v4l2-dbg \
+-	v4l2-sysfs-path cec-ctl cec-compliance cec-follower rds-ctl \
+-	dvb qv4l2 qvidcap
++DIST_SUBDIRS = libv4l2util libmedia_dev \
++	media-ctl v4l2-compliance v4l2-ctl v4l2-dbg \
++	v4l2-sysfs-path
++
+ am__DIST_COMMON = $(srcdir)/Makefile.in
+ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+ am__relativize = \
+-- 
+2.34.1
+

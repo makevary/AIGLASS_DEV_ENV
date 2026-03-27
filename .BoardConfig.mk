@@ -1,0 +1,1 @@
+project/cfg/BoardConfig_IPC/BoardConfig-EMMC-NONE-RV1103B_EVB1_V10_V11-IPC.mk

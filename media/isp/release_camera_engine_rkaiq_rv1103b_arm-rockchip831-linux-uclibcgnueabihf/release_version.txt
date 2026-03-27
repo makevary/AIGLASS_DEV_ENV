@@ -1,0 +1,8 @@
+commit b32c3c736adfa13f8443aa612d0b8437f5d982d2
+Author: ZhongYichong <zyc@rock-chips.com>
+Date:   Fri Oct 11 14:13:56 2024 +0800
+
+    sync to commit 7fec766 rawStream: fix NULL pointer error when stop without start
+    
+    Signed-off-by: ZhongYichong <zyc@rock-chips.com>
+    Change-Id: I4fad9b4ab41b4405b55a5484370f7bceddb2e32a

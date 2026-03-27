@@ -1,0 +1,6 @@
+RK_AVS_CAL_LOG: init calib params OK!
+RK_AVS_CAL_MODEL_LOG: model calibration start!
+RK_AVS_CAL_MODEL_LOG: Camera 1 image number is 24!
+RK_AVS_CAL_MODEL_LOG: Camera 0 image number is 24!
+RK_AVS_CAL_MODEL_LOG: Read RK_AVS_CAL_MODEL_LOG: Read 01 image 0 fail!  image 0 fail! ./calibModel/all_calib_images/camera1_000.yuv./calibModel/all_calib_images/camera0_000.yuv
+

@@ -1,0 +1,18 @@
+srcPath: ./multiVerify/src/
+dstPath: ./multiVerify/rk_calib_result/
+calibTorrentPath: ./multiVerify/src/rk_4_camera_result.xml
+imageNameFormat: .bin                                        //.jpg、.png、.bmp，.bin、.yuv
+cameraNum: 4                                                 //camera number（2-8）
+cameraType: 2                                                //0-pinhole、1-omn、2-fisheye
+cameraFov: 120                                               //horizontal fov
+boardWidth: 15                                               //number of chessboard corners in horizontal direction
+boardHeight: 8                                               //number of chessboard corners in vertical direction
+squareSize: 30                                               //size of chessboard(mm)
+imageWidth: 2560                                             //image width
+imageHeight: 1520                                            //image height
+imageStride: 2560                                            //image stride
+imageFormat: 2                                               //0-gray、1-rgb、2-yuv
+isSaveCornersImage: 1                                        //draw corners and save
+multiProductMode: 0                                          //multi product mode
+isRing: 1                                                    //is ring 
+isVerify: 1                                                  //1-is verify mode,0-is calib mode

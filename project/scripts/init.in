@@ -1,0 +1,106 @@
+#!/bin/sh
+if [ "$$" == "1" ]; then
+	# devtmpfs does not get automounted for initramfs
+	/bin/mount -t devtmpfs devtmpfs /dev
+	/bin/mount -t proc proc /proc
+	/bin/mount -t sysfs sysfs /sys
+	/bin/mount -t tmpfs tmpfs /tmp
+
+	exec 0</dev/console
+	exec 1>/dev/console
+	exec 2>/dev/console
+fi
+
+if [ "$rkdm_dbg" == "1" ];then
+	exec /sbin/init "$@"
+fi
+
+if [ "$rkdm_dbg" == "2" ];then
+	set -x
+fi
+
+# make sure /dev/ has mounted
+while [ ! -e /dev/mapper/control -o ! -e /proc/mounts ]
+do
+	usleep 10000
+done
+
+# PRE-CMD
+
+_BUILD_ID_=
+echo "DM:info: ${_BUILD_ID_}"
+STORGE_DEV=
+while [ ! -b "$STORGE_DEV" ]
+do
+	usleep 10000
+done
+
+if [ "$$" == "1" ]; then
+	INIT=`cat /proc/cmdline || echo ""`
+	if [ "$INIT" == "${INIT##*init=}" ]; then
+		INIT=""
+	else
+		INIT=${INIT##*init=}
+		INIT=${INIT%% *}
+	fi
+	test -z "$INIT" && INIT=/init
+fi
+
+CIPHER=
+OFFSET=
+HASH=
+ENC_EN=
+
+if [ "${ENC_EN}" = "true" ]; then
+
+	# encrypto partition should get size from dev
+	PART_SIZE=$(cat /sys/class/block/${STORGE_DEV##*\/}/size)
+
+	# TODO
+	if [ -f "/sbin/tee-supplicant" ]; then
+		/sbin/tee-supplicant &
+	fi
+	if [ -f "/sbin/keybox_app" ]; then
+		/sbin/keybox_app
+	fi
+
+	if [ ! -f "/tmp/syspw" ] || [ "$FORCE_KEY_WRITE" = "true" ]; then
+		rk_ota --misc_custom read
+		if [ "$?" != 0 ]; then
+			if [ "$FORCE_KEY_WRITE" != "true" ]; then
+				echo "DM:error: Can't fetch key from misc !!!"
+				exec /sbin/init "$@"
+				exit 0
+			fi
+		else
+			cat /tmp/custom_cmdline > /tmp/syspw
+			echo None > /tmp/custom_cmdline
+
+			if [ -f "/sbin/keybox_app" ]; then
+				rk_ota --misc_custom clean
+				/sbin/keybox_app write
+			fi
+		fi
+	fi
+	KEY=`cat /tmp/syspw`
+	echo None > /tmp/syspw
+	dmsetup create vroot --table "0 ${PART_SIZE} crypt ${CIPHER} ${KEY} 0 ${STORGE_DEV} 0 1 allow_discards"
+
+	if [ -f "/sbin/tee-supplicant" ]; then
+		killall tee-supplicant
+	fi
+fi
+
+if [ -n "${HASH}" ]; then
+	veritysetup --hash-offset=${OFFSET} create vroot ${STORGE_DEV} ${STORGE_DEV} ${HASH} > /dev/null 2>&1
+fi
+
+mount /dev/mapper/vroot /root
+
+echo ""
+echo "###DM:info init[$INIT] dm goto ${STORGE_DEV}"
+
+if [ "$$" == "1" ]; then
+	exec busybox switch_root /root ${INIT}
+	exec /sbin/init "$@"
+fi

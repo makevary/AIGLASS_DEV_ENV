@@ -1,0 +1,1229 @@
+state.rockchiprk809co {
+	control.1 {
+		iface MIXER
+		name 'Playback Path'
+		value SPK
+		comment {
+			access 'read write'
+			type ENUMERATED
+			count 1
+			item.0 OFF
+			item.1 RCV
+			item.2 SPK
+			item.3 HP
+			item.4 HP_NO_MIC
+			item.5 BT
+			item.6 SPK_HP
+			item.7 RING_SPK
+			item.8 RING_HP
+			item.9 RING_HP_NO_MIC
+			item.10 RING_SPK_HP
+		}
+	}
+	control.2 {
+		iface MIXER
+		name 'Capture MIC Path'
+		value 'Main Mic'
+		comment {
+			access 'read write'
+			type ENUMERATED
+			count 1
+			item.0 'MIC OFF'
+			item.1 'Main Mic'
+			item.2 'Hands Free Mic'
+			item.3 'BT Sco Mic'
+		}
+	}
+	control.3 {
+		iface MIXER
+		name 'Master Playback Volume'
+		value.0 50
+		value.1 50
+		comment {
+			access 'read write user'
+			type INTEGER
+			count 2
+			range '0 - 100'
+			tlv '0000000100000008fffff06000000028'
+			dbmin -4000
+			dbmax 0
+			dbvalue.0 -2000
+			dbvalue.1 -2000
+		}
+	}
+	control.4 {
+		iface MIXER
+		name 'Master Capture Volume'
+		value.0 100
+		value.1 100
+		comment {
+			access 'read write user'
+			type INTEGER
+			count 2
+			range '0 - 100'
+			tlv '0000000100000008fffff06000000028'
+			dbmin -4000
+			dbmax 0
+			dbvalue.0 0
+			dbvalue.1 0
+		}
+	}
+}
+state.Loopback {
+	control.1 {
+		iface PCM
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.2 {
+		iface PCM
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.3 {
+		iface PCM
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.4 {
+		iface PCM
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.5 {
+		iface PCM
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.6 {
+		iface PCM
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.7 {
+		iface PCM
+		subdevice 1
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.8 {
+		iface PCM
+		subdevice 1
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.9 {
+		iface PCM
+		subdevice 1
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.10 {
+		iface PCM
+		subdevice 1
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.11 {
+		iface PCM
+		subdevice 1
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.12 {
+		iface PCM
+		subdevice 1
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.13 {
+		iface PCM
+		subdevice 2
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.14 {
+		iface PCM
+		subdevice 2
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.15 {
+		iface PCM
+		subdevice 2
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.16 {
+		iface PCM
+		subdevice 2
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.17 {
+		iface PCM
+		subdevice 2
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.18 {
+		iface PCM
+		subdevice 2
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.19 {
+		iface PCM
+		subdevice 3
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.20 {
+		iface PCM
+		subdevice 3
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.21 {
+		iface PCM
+		subdevice 3
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.22 {
+		iface PCM
+		subdevice 3
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.23 {
+		iface PCM
+		subdevice 3
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.24 {
+		iface PCM
+		subdevice 3
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.25 {
+		iface PCM
+		subdevice 4
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.26 {
+		iface PCM
+		subdevice 4
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.27 {
+		iface PCM
+		subdevice 4
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.28 {
+		iface PCM
+		subdevice 4
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.29 {
+		iface PCM
+		subdevice 4
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.30 {
+		iface PCM
+		subdevice 4
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.31 {
+		iface PCM
+		subdevice 5
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.32 {
+		iface PCM
+		subdevice 5
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.33 {
+		iface PCM
+		subdevice 5
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.34 {
+		iface PCM
+		subdevice 5
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.35 {
+		iface PCM
+		subdevice 5
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.36 {
+		iface PCM
+		subdevice 5
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.37 {
+		iface PCM
+		subdevice 6
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.38 {
+		iface PCM
+		subdevice 6
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.39 {
+		iface PCM
+		subdevice 6
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.40 {
+		iface PCM
+		subdevice 6
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.41 {
+		iface PCM
+		subdevice 6
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.42 {
+		iface PCM
+		subdevice 6
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.43 {
+		iface PCM
+		subdevice 7
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.44 {
+		iface PCM
+		subdevice 7
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.45 {
+		iface PCM
+		subdevice 7
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.46 {
+		iface PCM
+		subdevice 7
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.47 {
+		iface PCM
+		subdevice 7
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.48 {
+		iface PCM
+		subdevice 7
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.49 {
+		iface PCM
+		device 1
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.50 {
+		iface PCM
+		device 1
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.51 {
+		iface PCM
+		device 1
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.52 {
+		iface PCM
+		device 1
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.53 {
+		iface PCM
+		device 1
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.54 {
+		iface PCM
+		device 1
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.55 {
+		iface PCM
+		device 1
+		subdevice 1
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.56 {
+		iface PCM
+		device 1
+		subdevice 1
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.57 {
+		iface PCM
+		device 1
+		subdevice 1
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.58 {
+		iface PCM
+		device 1
+		subdevice 1
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.59 {
+		iface PCM
+		device 1
+		subdevice 1
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.60 {
+		iface PCM
+		device 1
+		subdevice 1
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.61 {
+		iface PCM
+		device 1
+		subdevice 2
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.62 {
+		iface PCM
+		device 1
+		subdevice 2
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.63 {
+		iface PCM
+		device 1
+		subdevice 2
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.64 {
+		iface PCM
+		device 1
+		subdevice 2
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.65 {
+		iface PCM
+		device 1
+		subdevice 2
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.66 {
+		iface PCM
+		device 1
+		subdevice 2
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.67 {
+		iface PCM
+		device 1
+		subdevice 3
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.68 {
+		iface PCM
+		device 1
+		subdevice 3
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.69 {
+		iface PCM
+		device 1
+		subdevice 3
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.70 {
+		iface PCM
+		device 1
+		subdevice 3
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.71 {
+		iface PCM
+		device 1
+		subdevice 3
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.72 {
+		iface PCM
+		device 1
+		subdevice 3
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.73 {
+		iface PCM
+		device 1
+		subdevice 4
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.74 {
+		iface PCM
+		device 1
+		subdevice 4
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.75 {
+		iface PCM
+		device 1
+		subdevice 4
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.76 {
+		iface PCM
+		device 1
+		subdevice 4
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.77 {
+		iface PCM
+		device 1
+		subdevice 4
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.78 {
+		iface PCM
+		device 1
+		subdevice 4
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.79 {
+		iface PCM
+		device 1
+		subdevice 5
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.80 {
+		iface PCM
+		device 1
+		subdevice 5
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.81 {
+		iface PCM
+		device 1
+		subdevice 5
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.82 {
+		iface PCM
+		device 1
+		subdevice 5
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.83 {
+		iface PCM
+		device 1
+		subdevice 5
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.84 {
+		iface PCM
+		device 1
+		subdevice 5
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.85 {
+		iface PCM
+		device 1
+		subdevice 6
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.86 {
+		iface PCM
+		device 1
+		subdevice 6
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.87 {
+		iface PCM
+		device 1
+		subdevice 6
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.88 {
+		iface PCM
+		device 1
+		subdevice 6
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.89 {
+		iface PCM
+		device 1
+		subdevice 6
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.90 {
+		iface PCM
+		device 1
+		subdevice 6
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+	control.91 {
+		iface PCM
+		device 1
+		subdevice 7
+		name 'PCM Rate Shift 100000'
+		value 100000
+		comment {
+			access 'read write'
+			type INTEGER
+			count 1
+			range '80000 - 120000 (step 1)'
+		}
+	}
+	control.92 {
+		iface PCM
+		device 1
+		subdevice 7
+		name 'PCM Notify'
+		value false
+		comment {
+			access 'read write'
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.93 {
+		iface PCM
+		device 1
+		subdevice 7
+		name 'PCM Slave Active'
+		value false
+		comment {
+			access read
+			type BOOLEAN
+			count 1
+		}
+	}
+	control.94 {
+		iface PCM
+		device 1
+		subdevice 7
+		name 'PCM Slave Format'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 52 (step 1)'
+		}
+	}
+	control.95 {
+		iface PCM
+		device 1
+		subdevice 7
+		name 'PCM Slave Rate'
+		value 48000
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '0 - 192000 (step 1)'
+		}
+	}
+	control.96 {
+		iface PCM
+		device 1
+		subdevice 7
+		name 'PCM Slave Channels'
+		value 2
+		comment {
+			access read
+			type INTEGER
+			count 1
+			range '1 - 1024 (step 1)'
+		}
+	}
+}

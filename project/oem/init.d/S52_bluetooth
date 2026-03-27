@@ -1,0 +1,43 @@
+#!/bin/sh
+
+export RK96X_TARGET_PATH=/userdata/rx96x
+export DBUS_SYSTEM_BUS_ADDRESS='unix:path=/var/run/dbus/system_bus_socket'
+export LD_LIBRARY_PATH=/oem/usr/lib:$LD_LIBRARY_PATH
+
+# Create dbus directory
+mkdir -p /var/run/dbus/
+
+# Start dbus
+echo "Starting dbus-daemon..."
+/oem/usr/bin/dbus-daemon --fork --config-file=/usr/share/dbus-1/system.conf
+
+# Initialize Bluetooth hardware (rk_hciattach)
+echo "Initializing Bluetooth hardware..."
+/oem/usr/bin/rk_hciattach -n -s 115200 -m 1 /dev/ttyS2 rockchip 3000000 noflow nosleep &
+# Wait briefly for hciattach to settle
+sleep 1
+
+# Bring up hci0 (hciconfig is usually in /usr/bin from rootfs, try both)
+echo "Bringing up hci0..."
+if [ -x /oem/usr/bin/hciconfig ]; then
+    /oem/usr/bin/hciconfig hci0 up
+else
+    hciconfig hci0 up
+fi
+
+# Start Bluetooth daemon
+echo "Starting bluetoothd..."
+/oem/usr/bin/bluetoothd -n &
+sleep 1
+
+# Start BlueALSA
+echo "Starting BlueALSA..."
+/oem/usr/bin/bluealsa -p a2dp-sink -p hfp-hf &
+
+# Start BlueALSA Aplay
+echo "Starting BlueALSA Aplay..."
+/oem/usr/bin/bluealsa-aplay &
+
+# Start BT Service
+echo "Starting BT Service..."
+/oem/usr/bin/bt_service BT &

@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# WiFi 服务启动/停止脚本
+# 支持 RK962 和 RTL8723DS 双芯片
+
+# 检测使用的 WiFi 芯片类型
+detect_wifi_chip() {
+    if [ -f /etc/wifi_chip ]; then
+        cat /etc/wifi_chip
+    elif [ -f /oem/usr/ko/rk96x.ko ]; then
+        echo "rk962"
+    else
+        echo "rtl8723ds"
+    fi
+}
+
+WIFI_CHIP=$(detect_wifi_chip)
+
+case "$1" in
+  start)
+    echo "Starting Wi-Fi ($WIFI_CHIP)..."
+    if [ "$WIFI_CHIP" = "rk962" ]; then
+        /oem/usr/start_wifi_rk962.sh
+    else
+        /oem/usr/start_wifi.sh
+    fi
+    ;;
+  stop)
+    echo "Stopping Wi-Fi..."
+    killall -q wpa_supplicant
+    ifconfig wlan0 down
+    if [ "$WIFI_CHIP" = "rk962" ]; then
+        rmmod aes_generic 2>/dev/null
+        rmmod ccm 2>/dev/null
+        rmmod ctr 2>/dev/null
+        rmmod rk96x 2>/dev/null
+        rmmod mac80211 2>/dev/null
+        rmmod libarc4 2>/dev/null
+    else
+        rmmod rtl8723ds 2>/dev/null
+    fi
+    rmmod cfg80211 2>/dev/null
+    ;;
+  *)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0

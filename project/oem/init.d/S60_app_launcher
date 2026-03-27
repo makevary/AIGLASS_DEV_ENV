@@ -1,0 +1,32 @@
+#!/bin/sh
+
+export LD_LIBRARY_PATH=/oem/usr/lib:$LD_LIBRARY_PATH
+
+# 1. 等待 guard 和 ai-core 就绪
+# 设置最大等待时间 30秒，避免无限等待卡死系统
+TIMEOUT=30
+echo "Waiting for ai-core and guard..."
+
+while [ $TIMEOUT -gt 0 ]; do
+    # 检查两个进程是否都已存在
+    if pidof guard >/dev/null && pidof ai-core >/dev/null; then
+        echo "ai-core and guard are running."
+        break
+    fi
+    sleep 1
+    TIMEOUT=$((TIMEOUT-1))
+done
+
+if [ $TIMEOUT -eq 0 ]; then
+    echo "Timeout! ai-core or guard failed to start. Starting apps anyway..."
+fi
+
+# 2. 启动 display-service
+echo "Starting display-service..."
+/oem/usr/bin/display-service &
+# 建议给 display-service 一点初始化时间
+sleep 2
+
+# 3. 启动 launcher-app
+echo "Starting launcher-app..."
+/oem/usr/bin/launcher-app &

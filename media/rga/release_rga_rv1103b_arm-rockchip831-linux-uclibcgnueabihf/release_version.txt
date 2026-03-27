@@ -1,0 +1,10 @@
+commit cc1bf90a7049375be1e83aeb8356a51c34adcc5c
+Author: Yu Qiaowei <cerf.yu@rock-chips.com>
+Date:   Thu Aug 29 18:03:51 2024 +0800
+
+    ioctl: fix the wrong reserved memory size in rga_req
+    
+    fix for Change-Id: I85db61ef52a6dcdfca9ca35c4df3bc493262f442
+    
+    Change-Id: I8f9c5309563a2afbee09d72bb1c3979fefedc6fa
+    Signed-off-by: Yu Qiaowei <cerf.yu@rock-chips.com>

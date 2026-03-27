@@ -1,0 +1,12 @@
+# keep public repo metadata
+.git/
+.git
+.rsync-exclude
+
+# user-requested exclusions
+OpenSource-Ai-Glasses/
+docs/
+InternalProjects/
+.gitmodules
+AGENTS.md
+

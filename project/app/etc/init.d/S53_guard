@@ -1,0 +1,33 @@
+#!/bin/sh
+
+is_guard_running() {
+  for proc in /proc/[0-9]*; do
+    [ -r "$proc/comm" ] || continue
+    [ "$(cat "$proc/comm" 2>/dev/null)" = "guard" ] || continue
+    state=$(awk '{print $3}' "$proc/stat" 2>/dev/null)
+    [ "$state" = "Z" ] && continue
+    return 0
+  done
+  return 1
+}
+
+case "$1" in
+  start)
+    if is_guard_running; then
+      echo "Guard already running, skip duplicate start"
+      exit 0
+    fi
+    echo "Starting guard..."
+    export LD_LIBRARY_PATH=/oem/usr/lib:$LD_LIBRARY_PATH
+    /oem/usr/bin/guard &
+    ;;
+  stop)
+    echo "Stopping guard..."
+    ;;
+  *)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0

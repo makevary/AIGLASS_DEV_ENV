@@ -1,0 +1,66 @@
+#!/bin/sh
+
+export RK96X_TARGET_PATH=/userdata/rx96x
+export DBUS_SYSTEM_BUS_ADDRESS='unix:path=/var/run/dbus/system_bus_socket'
+export LD_LIBRARY_PATH=/oem/usr/lib:$LD_LIBRARY_PATH
+
+case "$1" in
+  start)
+    echo "Starting Bluetooth..."
+    
+    # 1. 启动 dbus-daemon
+    mkdir -p /var/run/dbus/
+    echo "  Starting dbus-daemon..."
+    /oem/usr/bin/dbus-daemon --fork --config-file=/usr/share/dbus-1/system.conf
+
+    # 2. 初始化蓝牙硬件
+    echo "  Initializing Bluetooth hardware..."
+    /oem/usr/bin/rk_hciattach -n -s 115200 -m 1 /dev/ttyS2 rockchip 3000000 noflow nosleep &
+    # Wait for hci0 to appear
+    echo "  Waiting for hci0..."
+    for i in $(seq 1 20); do
+        if hciconfig | grep -q "hci0"; then
+            break
+        fi
+        sleep 0.5
+    done
+
+    # 3. 启用接口
+    echo "  Bringing up hci0..."
+    hciconfig hci0 up
+
+    # # 4. 启动 bluetoothd
+    # echo "  Starting bluetoothd..."
+    # /oem/usr/bin/bluetoothd -C -n -E -P profile,battery,hostname,gap,wiimote -f /data/main.conf &
+    # sleep 1
+
+    # # 5. 启动 BlueALSA
+    # echo "  Starting BlueALSA..."
+    # /oem/usr/bin/bluealsa -S -p a2dp-sink -p hfp-hf &
+
+    # # 6. 启动 BlueALSA Aplay
+    # echo "  Starting BlueALSA Aplay..."
+    # /oem/usr/bin/bluealsa-aplay -S --profile-a2dp 00:00:00:00:00:00 &
+
+    # 7. 启动 BT Service
+    echo "  Starting BT Service..."
+    /oem/usr/bin/bt_service BT > /data/bt_service.log 2>&1 &
+    ;;
+  stop)
+    echo "Stopping Bluetooth..."
+    killall -q bt_service
+    killall -q bluealsa-aplay
+    killall -q bluealsa
+    killall -q bluetoothd
+    killall -q rk_hciattach
+    killall -q dbus-daemon
+    rm -f /run/messagebus.pid
+    hciconfig hci0 down 2>/dev/null
+    ;;
+  *)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0

@@ -1,0 +1,52 @@
+#!/bin/sh
+
+LOG_FILE="/tmp/gpio_setup.log"
+
+log() {
+    echo "$(date): $1" >> "$LOG_FILE"
+}
+
+case "$1" in
+  start)
+    log "Starting GPIO setup..."
+    
+    # GPIO 0
+    if [ ! -d /sys/class/gpio/gpio0 ]; then
+        log "Exporting GPIO 0"
+        echo 0 > /sys/class/gpio/export 2>> "$LOG_FILE"
+    else
+        log "GPIO 0 already exported"
+    fi
+    
+    if [ -d /sys/class/gpio/gpio0 ]; then
+        echo in > /sys/class/gpio/gpio0/direction 2>> "$LOG_FILE"
+        log "GPIO 0 direction set to input"
+    else
+        log "Error: GPIO 0 node not found!"
+    fi
+
+    # GPIO 75
+    if [ ! -d /sys/class/gpio/gpio75 ]; then
+        log "Exporting GPIO 75"
+        echo 75 > /sys/class/gpio/export 2>> "$LOG_FILE"
+    else
+        log "GPIO 75 already exported"
+    fi
+
+    if [ -d /sys/class/gpio/gpio75 ]; then
+        echo in > /sys/class/gpio/gpio75/direction 2>> "$LOG_FILE"
+        log "GPIO 75 direction set to input"
+    else
+         log "Error: GPIO 75 node not found!"
+    fi
+    ;;
+  stop)
+    log "Stopping GPIO setup..."
+    ;;
+  *)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0

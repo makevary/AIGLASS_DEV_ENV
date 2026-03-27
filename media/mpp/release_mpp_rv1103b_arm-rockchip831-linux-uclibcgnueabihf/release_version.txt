@@ -1,0 +1,15 @@
+commit 06e2fc5a781fa16735d5e2ff4dd97a0d96c864e1
+Author: timkingh.huang <timkingh.huang@rock-chips.com>
+Date:   Fri Sep 6 22:13:59 2024 +0800
+
+    feat[vepu500]: Add new cfg param for qpmap
+    
+    static_frm_num: static frame number, [0, 7]
+    madp16_th: madp threshold for static block detection, [0, 63]
+    skip16_wgt: weight for skip16, 0 or [3, 8]
+    skip32_wgt: weight for skip32, 0 or [3, 8]
+    
+    related to https://10.10.10.29/c/rk/mpp/+/234392
+    
+    Signed-off-by: timkingh.huang <timkingh.huang@rock-chips.com>
+    Change-Id: Ib82caf602f780eeb41cb31a89ebeef1f55f114b0

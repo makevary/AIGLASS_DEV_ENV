@@ -1,0 +1,2 @@
+/home/ezxr/Documents/Solutions/aiglass_dev_env/project/app/component/rkfsmk/out/lib/librkfsmk.so
+/home/ezxr/Documents/Solutions/aiglass_dev_env/project/app/component/rkfsmk/out/include/rkfsmk.h

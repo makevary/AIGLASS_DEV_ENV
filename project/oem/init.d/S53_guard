@@ -1,0 +1,68 @@
+#!/bin/sh
+
+START_LOCK_DIR="/tmp/guard.init.start.lock"
+START_LOCK_PID_FILE="$START_LOCK_DIR/pid"
+
+release_start_lock() {
+  rm -rf "$START_LOCK_DIR" 2>/dev/null
+}
+
+acquire_start_lock() {
+  if mkdir "$START_LOCK_DIR" 2>/dev/null; then
+    echo "$$" > "$START_LOCK_PID_FILE"
+    trap 'release_start_lock' EXIT INT TERM
+    return 0
+  fi
+
+  if [ -r "$START_LOCK_PID_FILE" ]; then
+    lock_pid=$(cat "$START_LOCK_PID_FILE" 2>/dev/null)
+    if [ -n "$lock_pid" ] && kill -0 "$lock_pid" 2>/dev/null; then
+      echo "Guard start already in progress, skip duplicate start"
+      return 1
+    fi
+  fi
+
+  # 锁目录存在但持有者进程已不存在，视为残留锁并清理后重试
+  release_start_lock
+  if mkdir "$START_LOCK_DIR" 2>/dev/null; then
+    echo "$$" > "$START_LOCK_PID_FILE"
+    trap 'release_start_lock' EXIT INT TERM
+    return 0
+  fi
+
+  echo "Guard start already in progress, skip duplicate start"
+  return 1
+}
+
+is_guard_running() {
+  for proc in /proc/[0-9]*; do
+    [ -r "$proc/comm" ] || continue
+    [ "$(cat "$proc/comm" 2>/dev/null)" = "guard" ] || continue
+    state=$(awk '{print $3}' "$proc/stat" 2>/dev/null)
+    [ "$state" = "Z" ] && continue
+    return 0
+  done
+  return 1
+}
+
+case "$1" in
+  start)
+    acquire_start_lock || exit 0
+    if is_guard_running; then
+      echo "Guard already running, skip duplicate start"
+      exit 0
+    fi
+    echo "Starting guard..."
+    export LD_LIBRARY_PATH=/oem/usr/lib:$LD_LIBRARY_PATH
+    /oem/usr/bin/guard &
+    ;;
+  stop)
+    echo "Stopping guard..."
+    ;;
+  *)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0
