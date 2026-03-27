@@ -65,8 +65,10 @@ sysdrv/source/uboot/u-boot/tee.bin
 # U-Boot host tools generated during build
 sysdrv/source/uboot/u-boot/scripts/basic/fixdep
 sysdrv/source/uboot/u-boot/scripts/dtc/dtc
-sysdrv/source/uboot/u-boot/scripts/dtc/dtc-lexer.lex.*
-sysdrv/source/uboot/u-boot/scripts/dtc/dtc-parser.tab.*
+# keep dtc parser shipped files for public sync; ignore generated outputs only
+sysdrv/source/uboot/u-boot/scripts/dtc/dtc-lexer.lex.c
+sysdrv/source/uboot/u-boot/scripts/dtc/dtc-parser.tab.c
+sysdrv/source/uboot/u-boot/scripts/dtc/dtc-parser.tab.h
 sysdrv/source/uboot/u-boot/scripts/kconfig/conf
 sysdrv/source/uboot/u-boot/scripts/kconfig/conf.o
 # keep parser sources and *_shipped files for public sync; ignore generated outputs only
