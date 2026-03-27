@@ -88,6 +88,8 @@ sysdrv/source/uboot/u-boot/**/asm-offsets.s
 sysdrv/source/uboot/u-boot/**/include/autoconf.mk*
 sysdrv/source/uboot/u-boot/include/config.h
 sysdrv/source/uboot/u-boot/**/u-boot.cfg
-sysdrv/source/uboot/u-boot/**/u-boot-spl.lds
+# keep source linker scripts; ignore build outputs only
+sysdrv/source/uboot/u-boot/spl/u-boot-spl.lds
+sysdrv/source/uboot/u-boot/tpl/u-boot-spl.lds
 sysdrv/source/uboot/u-boot/tools/common/
 sysdrv/source/uboot/u-boot/tools/lib/
