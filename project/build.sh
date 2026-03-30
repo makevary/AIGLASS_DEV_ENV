@@ -288,6 +288,7 @@ function usage()
 {
 	echo "Usage: build.sh [OPTIONS]"
 	echo "Available options:"
+	echo "--without-display  -disable display startup (skip S60_app_launcher)"
 	echo "lunch              -Select Board Configure"
 	echo "env                -build env"
 	echo "meta               -build meta (optional)"
@@ -322,6 +323,9 @@ function usage()
 	echo "save               -save images, patches, commands used to debug"
 	echo "check              -check the environment of building"
 	echo "info               -see the current board building information"
+	echo ""
+	echo "Display build (default): ./build.sh [OPTIONS]"
+	echo "Headless build: ./build.sh --without-display [OPTIONS]"
 	echo ""
 	echo "Default option is 'allsave'."
 	finish_build
@@ -1747,15 +1751,21 @@ EOF
         fi
 
 	# Copy S60_app_launcher (from project/oem/init.d)
-        if [ -f "$PROJECT_TOP_DIR/oem/init.d/S60_app_launcher" ]; then
-             cp -f $PROJECT_TOP_DIR/oem/init.d/S60_app_launcher $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/init.d/
-             sed -i 's/\r$//' $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/init.d/S60_app_launcher
-             chmod a+x $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/init.d/S60_app_launcher
+	if [ "${RK_ENABLE_DISPLAY_STARTUP:-y}" = "y" ]; then
+	        if [ -f "$PROJECT_TOP_DIR/oem/init.d/S60_app_launcher" ]; then
+	             cp -f $PROJECT_TOP_DIR/oem/init.d/S60_app_launcher $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/init.d/
+	             sed -i 's/\r$//' $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/init.d/S60_app_launcher
+	             chmod a+x $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/init.d/S60_app_launcher
 
-             # Create Symlink in rcS.d (for auto-start)
-             mkdir -p $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/rcS.d
-             ln -sf ../init.d/S60_app_launcher $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/rcS.d/S60_app_launcher
-        fi
+	             # Create Symlink in rcS.d (for auto-start)
+	             mkdir -p $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/rcS.d
+	             ln -sf ../init.d/S60_app_launcher $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/rcS.d/S60_app_launcher
+	        fi
+	else
+		msg_info "RK_ENABLE_DISPLAY_STARTUP=n, skip S60_app_launcher"
+		rm -f $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/init.d/S60_app_launcher
+		rm -f $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/rcS.d/S60_app_launcher
+	fi
 
 	# Bluetooth Libraries (from project/oem/lib)
         if [ -d "$PROJECT_TOP_DIR/oem/lib" ]; then
@@ -2963,6 +2973,7 @@ if [ ! -e "$BOARD_CONFIG" ];then
 	build_select_board
 fi
 [ -L "$BOARD_CONFIG" ] && source $BOARD_CONFIG
+RK_ENABLE_DISPLAY_STARTUP=${RK_ENABLE_DISPLAY_STARTUP:-y}
 export RK_PROJECT_BOARD_DIR=$(dirname $(realpath $BOARD_CONFIG))
 export RK_PROJECT_TOOLCHAIN_CROSS=$RK_TOOLCHAIN_CROSS
 export PATH="${SDK_ROOT_DIR}/tools/linux/toolchain/${RK_PROJECT_TOOLCHAIN_CROSS}/bin":$PATH
@@ -3008,6 +3019,7 @@ option=""
 while [ $# -ne 0 ]
 do
 	case $1 in
+		--without-display) RK_ENABLE_DISPLAY_STARTUP=n;;
 		DEBUG) export RK_BUILD_VERSION_TYPE=DEBUG;;
 		all) option=build_all ;;
 		save) option=build_save ;;
