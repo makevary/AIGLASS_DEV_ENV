@@ -51,6 +51,8 @@ static int g_nn_osd_run_ = 0;
 static int pipe_id_ = 0;
 static int dev_id_ = 0;
 static int cycle_snapshot_flag = 0;
+static pthread_mutex_t g_video_pts_mutex_ = PTHREAD_MUTEX_INITIALIZER;
+static int64_t g_video_latest_pts_[3] = {-1, -1, -1};
 static const char *tmp_output_data_type = "H.264";
 static const char *tmp_rc_mode;
 static const char *tmp_h264_profile;
@@ -63,6 +65,28 @@ static pthread_t vi_thread_1, venc_thread_0, venc_thread_1, venc_thread_2, jpeg_
 
 static MPP_CHN_S vi_chn, vpss_bgr_chn, vpss_rotate_chn, vo_chn, vpss_out_chn[4], venc_chn, ivs_chn;
 static VO_DEV VoLayer = RK3588_VOP_LAYER_CLUSTER0;
+
+static void rkipc_video_update_latest_pts(int stream_id, int64_t pts) {
+	if (stream_id < 0 || stream_id >= 3)
+		return;
+
+	pthread_mutex_lock(&g_video_pts_mutex_);
+	g_video_latest_pts_[stream_id] = pts;
+	pthread_mutex_unlock(&g_video_pts_mutex_);
+}
+
+int64_t rkipc_video_get_latest_pts(int stream_id) {
+	int64_t pts = -1;
+
+	if (stream_id < 0 || stream_id >= 3)
+		return -1;
+
+	pthread_mutex_lock(&g_video_pts_mutex_);
+	pts = g_video_latest_pts_[stream_id];
+	pthread_mutex_unlock(&g_video_pts_mutex_);
+
+	return pts;
+}
 
 typedef enum rkCOLOR_INDEX_E {
 	RGN_COLOR_LUT_INDEX_0 = 0,
@@ -129,6 +153,7 @@ static void *rkipc_get_venc_0(void *arg) {
 		ret = RK_MPI_VENC_GetStream(VIDEO_PIPE_0, &stFrame, 2500);
 		if (ret == RK_SUCCESS) {
 			void *data = RK_MPI_MB_Handle2VirAddr(stFrame.pstPack->pMbBlk);
+			rkipc_video_update_latest_pts(0, stFrame.pstPack->u64PTS);
 			// fwrite(data, 1, stFrame.pstPack->u32Len, fp);
 			// fflush(fp);
 			// LOG_DEBUG("Count:%d, Len:%d, PTS is %" PRId64", enH264EType is %d\n", loopCount,
@@ -418,6 +443,7 @@ static void *rkipc_get_venc_1(void *arg) {
 		ret = RK_MPI_VENC_GetStream(VIDEO_PIPE_1, &stFrame, 2500);
 		if (ret == RK_SUCCESS) {
 			void *data = RK_MPI_MB_Handle2VirAddr(stFrame.pstPack->pMbBlk);
+			rkipc_video_update_latest_pts(1, stFrame.pstPack->u64PTS);
 			// LOG_INFO("Count:%d, Len:%d, PTS is %" PRId64", enH264EType is %d\n", loopCount,
 			// stFrame.pstPack->u32Len, stFrame.pstPack->u64PTS,
 			// stFrame.pstPack->DataType.enH264EType);
@@ -3066,6 +3092,11 @@ int rk_roi_set(roi_data_s *roi_data) {
 int rk_video_init() {
 	LOG_DEBUG("begin\n");
 	int ret = 0;
+	pthread_mutex_lock(&g_video_pts_mutex_);
+	g_video_latest_pts_[0] = -1;
+	g_video_latest_pts_[1] = -1;
+	g_video_latest_pts_[2] = -1;
+	pthread_mutex_unlock(&g_video_pts_mutex_);
 	enable_ivs = rk_param_get_int("video.source:enable_ivs", 1);
 	enable_jpeg = rk_param_get_int("video.source:enable_jpeg", 1);
 	enable_venc_0 = rk_param_get_int("video.source:enable_venc_0", 1);
@@ -3117,6 +3148,11 @@ int rk_video_init() {
 int rk_video_deinit() {
 	LOG_DEBUG("%s\n", __func__);
 	g_video_run_ = 0;
+	pthread_mutex_lock(&g_video_pts_mutex_);
+	g_video_latest_pts_[0] = -1;
+	g_video_latest_pts_[1] = -1;
+	g_video_latest_pts_[2] = -1;
+	pthread_mutex_unlock(&g_video_pts_mutex_);
 	int ret = 0;
 	if (enable_npu || enable_ivs)
 		ret |= rkipc_pipe_2_deinit();

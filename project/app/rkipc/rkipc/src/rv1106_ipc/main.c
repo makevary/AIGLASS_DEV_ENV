@@ -10,6 +10,7 @@
 #include "network.h"
 #include "param.h"
 #include "rockiva.h"
+#include "rkipc_holder_adapter.h"
 #include "server.h"
 #include "storage.h"
 #include "system.h"
@@ -169,8 +170,11 @@ int main(int argc, char **argv) {
 	}
 	RK_MPI_SYS_Init();
 	rk_video_init();
-	if (rk_param_get_int("audio.0:enable", 0))
+	if (rk_param_get_int("audio.0:enable", 0)) {
 		rkipc_audio_init();
+		if (!rk_audio_uses_ai_core_stream() && rkipc_holder_adapter_init() != 0)
+			LOG_ERROR("rkipc_holder_adapter_init failed\n");
+	}
 	rkipc_server_init();
 	rk_storage_init();
 	pthread_create(&key_chk, NULL, wait_key_event, NULL);
@@ -187,8 +191,11 @@ int main(int argc, char **argv) {
 	rk_video_deinit();
 	if (rk_param_get_int("video.source:enable_aiq", 1))
 		rk_isp_deinit(0);
-	if (rk_param_get_int("audio.0:enable", 0))
+	if (rk_param_get_int("audio.0:enable", 0)) {
+		if (!rk_audio_uses_ai_core_stream())
+			rkipc_holder_adapter_deinit();
 		rkipc_audio_deinit();
+	}
 	RK_MPI_SYS_Exit();
 	if (rk_param_get_int("video.source:enable_npu", 0))
 		rkipc_rockiva_deinit();

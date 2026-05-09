@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
+set(AI_CORE_SDK_DIR ${PROJECT_SOURCE_DIR}/../../../../InternalProjects/ai_core/ai_glass_sdk)
+
 include_directories(${PROJECT_SOURCE_DIR}/./include
 					${CMAKE_SYSROOT}/usr/include/rkaiq/
 					${CMAKE_SYSROOT}/usr/include/rkaiq/uAPI
@@ -11,7 +13,12 @@ include_directories(${PROJECT_SOURCE_DIR}/./include
 					${CMAKE_SYSROOT}/usr/include/rkaiq/iq_parser_v2
 					${CMAKE_SYSROOT}/usr/include/libdrm
 					${WPA_SUPPLICANT_INCLUDE_DIRS}
+					${AI_CORE_SDK_DIR}/include
 					)
+
+set(AI_CORE_SDK_SRCS
+	${AI_CORE_SDK_DIR}/src/ai_audio.c
+	${AI_CORE_SDK_DIR}/src/ai_ipc.c)
 
 aux_source_directory(./ SRCS)
 aux_source_directory(video SRCS)
@@ -72,9 +79,13 @@ link_directories(${PROJECT_SOURCE_DIR}/lib/arm-rockchip830-linux-uclibcgnueabihf
 # link_libraries(asan)
 
 add_executable(${PROJECT_NAME} ${SRCS})
+target_sources(${PROJECT_NAME} PRIVATE ${AI_CORE_SDK_SRCS})
 target_link_libraries(${PROJECT_NAME} pthread rockit rockchip_mpp rkaiq rtsp rkaudio_detect rkaudio_vqe wpa_client m rkmuxer freetype rockiva iconv rknnmrt rga stdc++ rksysutils rkaudio)
 
+add_executable(rkipc_ctrl tools/rkipc_ctrl.c ${PROJECT_SOURCE_DIR}/common/socket_server/socket.c)
+
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+install(TARGETS rkipc_ctrl RUNTIME DESTINATION bin)
 if(RK_APP_CHIP STREQUAL "rv1103b")
 	install(FILES rkipc-1920x1080-rv1103b.ini DESTINATION share RENAME "rkipc-1920x1080.ini")
 	install(FILES rkipc-2304x1296-rv1103b.ini DESTINATION share RENAME "rkipc-2304x1296.ini")

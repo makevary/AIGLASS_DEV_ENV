@@ -1736,12 +1736,36 @@ int ser_rk_isp_af_focus_once(int fd) {
 }
 
 // audio
+int ser_rk_audio_suspend(int fd) {
+	int err = 0;
+
+	LOG_DEBUG("audio suspend begin\n");
+	err = rk_audio_suspend();
+	LOG_INFO("audio suspend end err=%d\n", err);
+	if (sock_write(fd, &err, sizeof(int)) == SOCKERR_CLOSED)
+		return -1;
+
+	return 0;
+}
+
+int ser_rk_audio_resume(int fd) {
+	int err = 0;
+
+	LOG_DEBUG("audio resume begin\n");
+	err = rk_audio_resume();
+	LOG_INFO("audio resume end err=%d\n", err);
+	if (sock_write(fd, &err, sizeof(int)) == SOCKERR_CLOSED)
+		return -1;
+
+	return 0;
+}
+
 int ser_rk_audio_restart(int fd) {
 	int err = 0;
 
 	LOG_DEBUG("restart begin\n");
 	err = rk_audio_restart();
-	LOG_DEBUG("restart end\n");
+	LOG_INFO("restart end err=%d\n", err);
 	if (sock_write(fd, &err, sizeof(int)) == SOCKERR_CLOSED)
 		return -1;
 
@@ -5549,6 +5573,8 @@ static const struct FunMap map[] = {
     {(char *)"rk_isp_af_focus_out", &ser_rk_isp_af_focus_out},
     {(char *)"rk_isp_af_focus_once", &ser_rk_isp_af_focus_once},
     // audio
+    {(char *)"rk_audio_suspend", &ser_rk_audio_suspend},
+    {(char *)"rk_audio_resume", &ser_rk_audio_resume},
     {(char *)"rk_audio_restart", &ser_rk_audio_restart},
     {(char *)"rk_audio_get_bit_rate", &ser_rk_audio_get_bit_rate},
     {(char *)"rk_audio_set_bit_rate", &ser_rk_audio_set_bit_rate},

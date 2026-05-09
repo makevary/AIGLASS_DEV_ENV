@@ -34,6 +34,10 @@ GLOBAL_FS_TYPE_SUFFIX=_fs_type
 GLOBAL_INITRAMFS_BOOT_NAME=""
 GLOBAL_PARTITIONS=""
 GLOBAL_SDK_VERSION=""
+OSAIG_VERSION_FILE=$PROJECT_TOP_DIR/OSAIG_VERSION
+OSAIG_DEFAULT_VERSION="0.6.5"
+OSAIG_FIRMWARE_VERSION=""
+OSAIG_DEVICE_MODEL=""
 
 export RK_JOBS=$((`getconf _NPROCESSORS_ONLN` / 2 + 1 ))
 export RK_BUILD_VERSION_TYPE=RELEASE
@@ -289,6 +293,8 @@ function usage()
 	echo "Usage: build.sh [OPTIONS]"
 	echo "Available options:"
 	echo "--without-display  -disable display startup (skip S60_app_launcher)"
+	echo "--osaig-version x.y.z -set OSAIG firmware version for firmware build"
+	echo "--osaig-model MODEL -set OSAIG device model for firmware build, for example O1 or O1-E"
 	echo "lunch              -Select Board Configure"
 	echo "env                -build env"
 	echo "meta               -build meta (optional)"
@@ -343,6 +349,98 @@ function build_get_sdk_version(){
 		echo "Not found ${SDK_ROOT_DIR}/.repo/manifest.xml [ignore] !!!"
 		GLOBAL_SDK_VERSION="NONE"
 	fi
+}
+
+function get_osaig_previous_version(){
+	local previous
+	if [ -f "$OSAIG_VERSION_FILE" ]; then
+		previous=$(sed -n '1p' "$OSAIG_VERSION_FILE" | tr -d '[:space:]')
+	fi
+
+	echo "${previous:-$OSAIG_DEFAULT_VERSION}"
+}
+
+function validate_osaig_version(){
+	local version="$1"
+	if [[ ! "$version" =~ ^[0-9]+[.][0-9]+[.][0-9]+$ ]]; then
+		msg_error "Invalid OSAIG firmware version: $version"
+		msg_error "Please use semantic version format: major.minor.patch, for example 0.7.0"
+		return 1
+	fi
+}
+
+function validate_osaig_device_model(){
+	local model="$1"
+	if [[ ! "$model" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$ ]]; then
+		msg_error "Invalid OSAIG device model: $model"
+		msg_error "Please use a short model code, for example O1 or O1-E"
+		return 1
+	fi
+}
+
+function prepare_osaig_device_model(){
+	if [ -z "$OSAIG_DEVICE_MODEL" ]; then
+		if [ "${RK_ENABLE_DISPLAY_STARTUP:-y}" = "y" ]; then
+			OSAIG_DEVICE_MODEL="O1-E"
+		else
+			OSAIG_DEVICE_MODEL="O1"
+		fi
+	fi
+
+	validate_osaig_device_model "$OSAIG_DEVICE_MODEL"
+	msg_info "OSAIG device model: $OSAIG_DEVICE_MODEL"
+}
+
+function prepare_osaig_firmware_version(){
+	local previous input
+	previous=$(get_osaig_previous_version)
+
+	if [ -n "$OSAIG_FIRMWARE_VERSION" ]; then
+		validate_osaig_version "$OSAIG_FIRMWARE_VERSION"
+		msg_info "OSAIG firmware version: $OSAIG_FIRMWARE_VERSION"
+		return
+	fi
+
+	if [ ! -t 0 ]; then
+		msg_error "OSAIG firmware version is required for non-interactive build."
+		msg_error "Please run: ./build.sh firmware --osaig-version $previous"
+		exit 1
+	fi
+
+	echo "Previous OSAIG firmware version: $previous"
+	read -p "Input OSAIG firmware version (major.minor.patch) [$previous]: " input
+	OSAIG_FIRMWARE_VERSION="${input:-$previous}"
+	validate_osaig_version "$OSAIG_FIRMWARE_VERSION"
+	msg_info "OSAIG firmware version: $OSAIG_FIRMWARE_VERSION"
+}
+
+function write_osaig_release_file(){
+	local release_path build_id build_time git_commit channel
+
+	prepare_osaig_device_model
+	validate_osaig_version "$OSAIG_FIRMWARE_VERSION"
+
+	release_path="$RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/osaig-release"
+	build_id=$(date "+%Y%m%d%H%M%S")
+	build_time=$(date "+%Y-%m-%dT%H:%M:%S%z")
+	git_commit=$(git -C "$SDK_ROOT_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")
+	channel="${OSAIG_CHANNEL:-dev}"
+
+	mkdir -p "$(dirname "$release_path")"
+	cat > "$release_path" <<EOF
+OSAIG_RELEASE_SCHEMA="1"
+OSAIG_NAME="OSAIG Glass OS"
+OSAIG_DEVICE_MODEL="$OSAIG_DEVICE_MODEL"
+OSAIG_VERSION_ID="$OSAIG_FIRMWARE_VERSION"
+OSAIG_PRETTY_NAME="OSAIG Glass OS $OSAIG_FIRMWARE_VERSION"
+OSAIG_BUILD_ID="$build_id"
+OSAIG_BUILD_TIME="$build_time"
+OSAIG_GIT_COMMIT="$git_commit"
+OSAIG_CHANNEL="$channel"
+EOF
+
+	printf '%s\n' "$OSAIG_FIRMWARE_VERSION" > "$OSAIG_VERSION_FILE"
+	msg_info "Generated $release_path"
 }
 
 function build_info(){
@@ -1478,60 +1576,6 @@ function __PACKAGE_RESOURCES()
 function __MAKE_MOUNT_SCRIPT()
 {
 	echo "$1" >> $RK_PROJECT_FILE_ROOTFS_SCRIPT
-}
-
-function __SYNC_INTERNAL_BINARIES_TO_OEM()
-{
-	local oem_bin_dir oem_share_dir ai_core_src guard_src bt_share_alsa_src bt_share_dbus_src
-	oem_bin_dir="$PROJECT_TOP_DIR/oem/bin"
-	oem_share_dir="$PROJECT_TOP_DIR/oem/share"
-	ai_core_src="$SDK_ROOT_DIR/InternalProjects/ai_core/service/build/ai-core"
-	guard_src="$SDK_ROOT_DIR/InternalProjects/guard/build/guard"
-	bt_share_alsa_src="$SDK_ROOT_DIR/InternalProjects/bt_service/bt/external/out/usr/share/alsa"
-	bt_share_dbus_src="$SDK_ROOT_DIR/InternalProjects/bt_service/bt/external/out/usr/share/dbus-1"
-
-	mkdir -p "$oem_bin_dir" "$oem_share_dir"
-
-	# ai-core is required: prefer fresh InternalProjects build output, fallback to existing oem copy.
-	if [ -f "$ai_core_src" ]; then
-		cp -f "$ai_core_src" "$oem_bin_dir/ai-core"
-	elif [ ! -f "$oem_bin_dir/ai-core" ]; then
-		msg_error "Missing required ai-core binary. Not found in:"
-		msg_error "  InternalProjects: $ai_core_src"
-		msg_error "  OEM fallback: $oem_bin_dir/ai-core"
-		exit 1
-	fi
-
-	# guard is required: prefer fresh InternalProjects build output, fallback to existing oem copy.
-	if [ -f "$guard_src" ]; then
-		cp -f "$guard_src" "$oem_bin_dir/guard"
-	elif [ ! -f "$oem_bin_dir/guard" ]; then
-		msg_error "Missing required guard binary. Not found in:"
-		msg_error "  InternalProjects: $guard_src"
-		msg_error "  OEM fallback: $oem_bin_dir/guard"
-		exit 1
-	fi
-
-	# Bluetooth share resources are required: prefer InternalProjects, fallback to existing oem/share.
-	if [ -d "$bt_share_alsa_src" ]; then
-		mkdir -p "$oem_share_dir/alsa"
-		cp -faR "$bt_share_alsa_src/." "$oem_share_dir/alsa/"
-	elif [ ! -d "$oem_share_dir/alsa" ]; then
-		msg_error "Missing required bt_service ALSA resources. Not found in:"
-		msg_error "  InternalProjects: $bt_share_alsa_src"
-		msg_error "  OEM fallback: $oem_share_dir/alsa"
-		exit 1
-	fi
-
-	if [ -d "$bt_share_dbus_src" ]; then
-		mkdir -p "$oem_share_dir/dbus-1"
-		cp -faR "$bt_share_dbus_src/." "$oem_share_dir/dbus-1/"
-	elif [ ! -d "$oem_share_dir/dbus-1" ]; then
-		msg_error "Missing required bt_service D-Bus resources. Not found in:"
-		msg_error "  InternalProjects: $bt_share_dbus_src"
-		msg_error "  OEM fallback: $oem_share_dir/dbus-1"
-		exit 1
-	fi
 }
 
 function __PACKAGE_OEM()
@@ -2795,6 +2839,8 @@ function __RUN_PRE_BUILD_OEM_SCRIPT() {
 function build_firmware(){
 	check_config RK_PARTITION_CMD_IN_ENV || return 0
 
+	prepare_osaig_firmware_version
+
 	build_env
 	build_meta
 
@@ -2803,9 +2849,6 @@ function build_firmware(){
 	if [ "$RK_ENABLE_RECOVERY" = "y" -a -f $PROJECT_TOP_DIR/scripts/${RK_MISC:=recovery-misc.img} ];then
 		cp -fv $PROJECT_TOP_DIR/scripts/$RK_MISC ${RK_PROJECT_OUTPUT_IMAGE}/misc.img
 	fi
-
-	# 先同步 InternalProjects 产物到 project/oem，后续打包统一从 oem 目录取文件
-	__SYNC_INTERNAL_BINARIES_TO_OEM
 
 	__PACKAGE_ROOTFS
 	__PACKAGE_OEM
@@ -2824,6 +2867,7 @@ function build_firmware(){
 
 	__RUN_POST_BUILD_SCRIPT
 	post_overlay
+	write_osaig_release_file
 
 	if [ -n "$GLOBAL_INITRAMFS_BOOT_NAME" ]; then
 		build_mkimg boot $RK_PROJECT_PACKAGE_ROOTFS_DIR
@@ -3020,6 +3064,22 @@ while [ $# -ne 0 ]
 do
 	case $1 in
 		--without-display) RK_ENABLE_DISPLAY_STARTUP=n;;
+		--osaig-version)
+			shift
+			if [ $# -eq 0 ]; then
+				msg_error "--osaig-version requires a value, for example 0.7.0"
+				exit 1
+			fi
+			OSAIG_FIRMWARE_VERSION="$1"
+			;;
+		--osaig-model)
+			shift
+			if [ $# -eq 0 ]; then
+				msg_error "--osaig-model requires a value, for example O1 or O1-E"
+				exit 1
+			fi
+			OSAIG_DEVICE_MODEL="$1"
+			;;
 		DEBUG) export RK_BUILD_VERSION_TYPE=DEBUG;;
 		all) option=build_all ;;
 		save) option=build_save ;;
