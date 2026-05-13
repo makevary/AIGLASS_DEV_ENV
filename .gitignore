@@ -38,6 +38,10 @@ media/samples/example/common/lib/*.a
 prefill_oem_from_internal.sh
 sync_to_public.sh
 
+# local machine-specific profile, must stay out of git
+docs/profile_local.md
+.codex
+
 # U-Boot in-tree build artifacts
 sysdrv/source/uboot/u-boot/.cc
 sysdrv/source/uboot/u-boot/.config

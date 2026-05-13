@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 patch -p1 < 0001-Fix-makefiles-for-out-of-tree-build.patch
 patch -p1 < 0002-Fix-adbd-for-non-Ubuntu-systems.patch
@@ -17,3 +18,4 @@ patch -p1 < 0014-Specify-login-shell-in-standard-way.patch
 patch -p1 < 0015-make-adb-tcp-function-default-enbale.patch
 patch -p1 < 0015-support-rsa-key-authentication.patch
 patch -p1 < 0016-fix-static-link-dl-lll_unlock_wait_private.patch
+patch -p1 < 0017-osaig-adbd-device-identity.patch

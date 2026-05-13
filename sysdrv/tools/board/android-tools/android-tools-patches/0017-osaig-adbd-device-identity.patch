@@ -1,0 +1,176 @@
+diff --git a/core/adbd/adb.c b/core/adbd/adb.c
+--- a/core/adbd/adb.c
++++ b/core/adbd/adb.c
+@@ -48,7 +48,136 @@ int gListenAll = 0;
+ static int auth_enabled = 0;
+-
++
+ #if !ADB_HOST
+ static const char *adb_device_banner = "device";
++#define OSAIG_RELEASE_PATH "/etc/osaig-release"
++#define OSAIG_DEVICE_MODEL_KEY "OSAIG_DEVICE_MODEL"
++#define OSAIG_ADB_PRODUCT "osaig_glass"
++#define OSAIG_DEFAULT_MODEL "O1"
++#define OSAIG_DEFAULT_DEVICE "o1"
++
++static void osaig_copy_string(char *dst, size_t dst_size, const char *src)
++{
++    if (dst_size == 0) {
++        return;
++    }
++
++    snprintf(dst, dst_size, "%s", src ? src : "");
++}
++
++static void osaig_strip_release_value(char *value)
++{
++    char *start = value;
++    char *end;
++    char quote = '\0';
++
++    while (*start && isspace((unsigned char)*start)) {
++        start++;
++    }
++
++    if (*start == '"' || *start == '\'') {
++        quote = *start;
++        start++;
++        end = strchr(start, quote);
++        if (end) {
++            *end = '\0';
++        } else {
++            end = start + strlen(start);
++            while (end > start && isspace((unsigned char)end[-1])) {
++                end--;
++            }
++            *end = '\0';
++        }
++    } else {
++        end = start + strlen(start);
++        while (end > start && isspace((unsigned char)end[-1])) {
++            end--;
++        }
++        *end = '\0';
++    }
++
++    if (start != value) {
++        memmove(value, start, strlen(start) + 1);
++    }
++}
++
++static int osaig_read_release_value(const char *key, char *value, size_t value_size)
++{
++    FILE *fp;
++    char line[256];
++    size_t key_len;
++    char *p;
++
++    if (value_size == 0) {
++        return 0;
++    }
++
++    value[0] = '\0';
++    fp = fopen(OSAIG_RELEASE_PATH, "r");
++    if (!fp) {
++        return 0;
++    }
++
++    key_len = strlen(key);
++    while (fgets(line, sizeof(line), fp)) {
++        p = line;
++        while (*p && isspace((unsigned char)*p)) {
++            p++;
++        }
++        if (strncmp(p, key, key_len) != 0) {
++            continue;
++        }
++        p += key_len;
++        while (*p && isspace((unsigned char)*p)) {
++            p++;
++        }
++        if (*p != '=') {
++            continue;
++        }
++        p++;
++        while (*p && isspace((unsigned char)*p)) {
++            p++;
++        }
++
++        osaig_copy_string(value, value_size, p);
++        osaig_strip_release_value(value);
++        fclose(fp);
++        return value[0] != '\0';
++    }
++
++    fclose(fp);
++    return 0;
++}
++
++static void osaig_get_adb_model(char *model, size_t model_size)
++{
++    if (!osaig_read_release_value(OSAIG_DEVICE_MODEL_KEY, model, model_size)) {
++        osaig_copy_string(model, model_size, OSAIG_DEFAULT_MODEL);
++    }
++}
++
++static void osaig_make_adb_device(const char *model, char *device, size_t device_size)
++{
++    size_t i;
++    size_t j = 0;
++
++    if (device_size == 0) {
++        return;
++    }
++
++    for (i = 0; model && model[i] && j < device_size - 1; i++) {
++        unsigned char ch = (unsigned char)model[i];
++        if (isalnum(ch)) {
++            device[j++] = (char)tolower(ch);
++        }
++    }
++
++    if (j == 0) {
++        osaig_copy_string(device, device_size, OSAIG_DEFAULT_DEVICE);
++        return;
++    }
++
++    device[j] = '\0';
++}
+ #endif
+-
++
+ void fatal(const char *fmt, ...)
+@@ -300,13 +429,18 @@ static size_t fill_connect_data(char *buf, size_t bufsize)
+     };
+     static const int num_cnxn_props = ARRAY_SIZE(cnxn_props);
+-    static const char *values[] = {
+-        "occam",
+-        "Nexus 4",
+-        "mako",
+-    };
+     int i;
+     size_t remaining = bufsize;
+     size_t len;
++    char model[PROPERTY_VALUE_MAX];
++    char device[PROPERTY_VALUE_MAX];
++    const char *values[ARRAY_SIZE(cnxn_props)];
++
++    osaig_get_adb_model(model, sizeof(model));
++    osaig_make_adb_device(model, device, sizeof(device));
++
++    values[0] = OSAIG_ADB_PRODUCT;
++    values[1] = model;
++    values[2] = device;
+-
++
+     len = snprintf(buf, remaining, "%s::", adb_device_banner);
+     remaining -= len;
+@@ -313,8 +447,6 @@ static size_t fill_connect_data(char *buf, size_t bufsize)
+     remaining -= len;
+     buf += len;
+     for (i = 0; i < num_cnxn_props; i++) {
+-        char value[PROPERTY_VALUE_MAX];
+-        //property_get(cnxn_props[i], value, "");
+         len = snprintf(buf, remaining, "%s=%s;", cnxn_props[i], values[i]);
+         remaining -= len;
+         buf += len;
