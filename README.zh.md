@@ -238,7 +238,6 @@ ls -lh output/image/update.img
 
 ## 📚 文档
 
-- [📖 用户使用手册](docs/USER_GUIDE.md) - 眼镜组装完毕之后读这个
 - [🧰 开发环境搭建指南](docs/ENV_SETUP.md) | [English](docs/ENV_SETUP.en.md)
 - [💻 应用开发指南](docs/APPLICATION_DEVELOPMENT.md) | [English](docs/APPLICATION_DEVELOPMENT.en.md)
 - [⚡ 固件烧录指南](docs/FIRMWARE_FLASHING.md) | [English](docs/FIRMWARE_FLASHING.en.md)

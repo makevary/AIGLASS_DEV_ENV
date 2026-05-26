@@ -1,0 +1,146 @@
+# AI智能眼镜开源项目文档配置
+# AI Smart Glasses Open Source Project Documentation Configuration
+
+project:
+  name: "AI Smart Glasses"
+  description: "An open-source Linux-based smart glasses project for medical, industrial, educational, and consumer applications"
+  version: "1.0.0"
+  repository: "https://github.com/Iam5tillLearning/OpenSource-Ai-Glasses"
+  homepage: "https://iam5tilllearning.github.io/OpenSource-Ai-Glasses"
+
+# 多语言配置
+languages:
+  - code: "en"
+    name: "English"
+    default: true
+  - code: "zh"
+    name: "中文"
+    default: false
+
+# 文档结构配置
+structure:
+  docs_dir: "docs"
+  assets_dir: "assets"
+  templates_dir: "templates"
+  output_dir: "_site"
+  base_url: "/OpenSource-Ai-Glasses"
+
+# 导航配置
+navigation:
+  auto_generate: true
+  max_depth: 3
+  sort_by: "order"
+  show_toc: true
+  toc_depth: 3
+
+# 搜索配置
+search:
+  enabled: true
+  language: ["en", "zh"]
+  min_query_length: 2
+  max_results: 50
+
+# 主题配置
+theme:
+  name: "minima"
+  color_scheme: "auto"
+  font_family: "system-ui, -apple-system, sans-serif"
+  code_font_family: "Monaco, Menlo, Consolas, monospace"
+
+# 插件配置
+plugins:
+  - jekyll-sitemap
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-relative-links
+  - jekyll-optional-front-matter
+  - jekyll-readme-index
+  - jekyll-titles-from-headings
+  - jekyll-mermaid
+
+# Mermaid图表配置
+mermaid:
+  enabled: true
+  theme: "default"
+  theme_variables:
+    primaryColor: "#007bff"
+    primaryTextColor: "#fff"
+    primaryBorderColor: "#007bff"
+    lineColor: "#666"
+    secondaryColor: "#6c757d"
+    tertiaryColor: "#f8f9fa"
+
+# Markdown配置
+markdown:
+  commonmark:
+    options: ["SMART", "FOOTNOTES"]
+    extensions: ["autolink", "strikethrough", "table", "tagfilter"]
+  kramdown:
+    input: GFM
+    hard_wrap: false
+    syntax_highlighter: rouge
+    syntax_highlighter_opts:
+      block:
+        line_numbers: false
+
+# 高亮配置
+highlighter: rouge
+rouge:
+  css_class: 'highlight'
+  line_numbers: false
+
+# 排除文件
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - "*.gemspec"
+  - Rakefile
+  - README.md
+  - LICENCE
+  - ".specify/"
+  - "specs/"
+  - "internal-docs/"
+
+# 包含文件
+include:
+  - "_pages"
+  - "_data"
+
+# 分页配置
+paginate: 10
+paginate_path: "/page:num/"
+
+# 时间戳格式
+timezone: Asia/Shanghai
+future: true
+show_drafts: false
+unpublished: false
+
+# SEO配置
+title: "AI Smart Glasses - Open Source Project"
+description: "An open-source Linux-based smart glasses project for medical, industrial, educational, and consumer applications"
+url: "https://iam5stilllearning.github.io/OpenSource-Ai-Glasses"
+author: "Iam5stillLearning"
+logo: "/assets/images/logo.png"
+
+# 社交链接
+social:
+  name: "Iam5stillLearning"
+  links:
+    - "https://github.com/Iam5stillLearning"
+
+# Google Analytics (可选)
+google_analytics: # G-XXXXXXXXXX
+
+# 构建配置
+incremental: false
+profile: true
+
+# 开发模式
+livereload: true
+safe: false

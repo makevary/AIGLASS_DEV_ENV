@@ -240,7 +240,6 @@ Please refer to the "Integration" section in the [SDK README](SDK/ai_glass_sdk/R
 
 ## 📚 Documentation
 
-- [📖 User Manual](docs/USER_GUIDE.en.md) - Read this after glasses assembly
 - [🧰 Development Environment Setup Guide](docs/ENV_SETUP.en.md) | [中文](docs/ENV_SETUP.md)
 - [💻 Application Development Guide](docs/APPLICATION_DEVELOPMENT.en.md) | [中文](docs/APPLICATION_DEVELOPMENT.md)
 - [⚡ Firmware Flashing Guide](docs/FIRMWARE_FLASHING.en.md) | [中文](docs/FIRMWARE_FLASHING.md)
