@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 3.5)
 
-set(AI_CORE_SDK_DIR ${PROJECT_SOURCE_DIR}/../../../../InternalProjects/ai_core/ai_glass_sdk)
+set(AI_GLASS_SDK_DIR ${PROJECT_SOURCE_DIR}/../../../../OpenSource-Ai-Glasses/SDK/ai_glass_sdk)
+set(AI_GLASS_SDK_STATIC_LIB ${AI_GLASS_SDK_DIR}/lib/libai_glass_sdk.a)
+
+if(NOT EXISTS "${AI_GLASS_SDK_DIR}/include/ai_audio.h")
+	message(FATAL_ERROR "ai_glass_sdk headers not found: ${AI_GLASS_SDK_DIR}/include")
+endif()
+
+if(NOT EXISTS "${AI_GLASS_SDK_STATIC_LIB}")
+	message(FATAL_ERROR "ai_glass_sdk static library not found: ${AI_GLASS_SDK_STATIC_LIB}")
+endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/./include
 					${CMAKE_SYSROOT}/usr/include/rkaiq/
@@ -13,12 +22,8 @@ include_directories(${PROJECT_SOURCE_DIR}/./include
 					${CMAKE_SYSROOT}/usr/include/rkaiq/iq_parser_v2
 					${CMAKE_SYSROOT}/usr/include/libdrm
 					${WPA_SUPPLICANT_INCLUDE_DIRS}
-					${AI_CORE_SDK_DIR}/include
+					${AI_GLASS_SDK_DIR}/include
 					)
-
-set(AI_CORE_SDK_SRCS
-	${AI_CORE_SDK_DIR}/src/ai_audio.c
-	${AI_CORE_SDK_DIR}/src/ai_ipc.c)
 
 aux_source_directory(./ SRCS)
 aux_source_directory(video SRCS)
@@ -79,8 +84,7 @@ link_directories(${PROJECT_SOURCE_DIR}/lib/arm-rockchip830-linux-uclibcgnueabihf
 # link_libraries(asan)
 
 add_executable(${PROJECT_NAME} ${SRCS})
-target_sources(${PROJECT_NAME} PRIVATE ${AI_CORE_SDK_SRCS})
-target_link_libraries(${PROJECT_NAME} pthread rockit rockchip_mpp rkaiq rtsp rkaudio_detect rkaudio_vqe wpa_client m rkmuxer freetype rockiva iconv rknnmrt rga stdc++ rksysutils rkaudio)
+target_link_libraries(${PROJECT_NAME} ${AI_GLASS_SDK_STATIC_LIB} pthread rt rockit rockchip_mpp rkaiq rtsp rkaudio_detect rkaudio_vqe wpa_client m rkmuxer freetype rockiva iconv rknnmrt rga stdc++ rksysutils rkaudio)
 
 add_executable(rkipc_ctrl tools/rkipc_ctrl.c ${PROJECT_SOURCE_DIR}/common/socket_server/socket.c)
 
