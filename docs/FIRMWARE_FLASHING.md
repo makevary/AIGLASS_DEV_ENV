@@ -14,7 +14,7 @@
 > - 🔄 设备系统损坏需要恢复
 > - 🆕 需要安装特定版本的固件
 >
-> **如果您是首次使用设备，建议先完成 [应用开发指南](APPLICATION_DEVELOPMENT.md) 中的基础开发流程，再按需烧录固件。**
+> **如果您是首次使用设备，建议先参考 [快速入门指南](tutorials/beginner/getting-started.md) 直接开始应用开发。**
 
 ## 📋 前置要求
 
@@ -382,6 +382,8 @@ adb devices
 
 - [开发环境搭建指南](ENV_SETUP.md) - 开发环境搭建
 - [应用开发指南](APPLICATION_DEVELOPMENT.md) - 应用程序开发入门
+- [固件开发指南](firmware/getting-started.md) - 固件开发入门
+- [故障排除](troubleshooting/common-issues.md) - 常见问题解决
 
 ## 📞 获取帮助
 
@@ -389,7 +391,7 @@ adb devices
 - 📖 查阅本文档的常见问题部分
 - 💬 在 [GitHub Issues](https://github.com/Iam5stillLearning/OpenSource-Ai-Glasses/issues) 提问
 - 📧 发送邮件至: iam5stilllearning@foxmail.com
-- 💡 查看上方“常见问题”章节
+- 💡 查看 [故障排除文档](troubleshooting/common-issues.md)
 
 ---
 
