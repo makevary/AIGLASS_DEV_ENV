@@ -14,7 +14,7 @@ This document describes how to flash compiled firmware to AI Smart Glasses devic
 > - 🔄 Device system damaged and needs recovery
 > - 🆕 Need to install specific version of firmware
 >
-> **If this is your first time using the device, complete the basic workflow in the [Application Development Guide](APPLICATION_DEVELOPMENT.en.md) first, then flash firmware only when needed.**
+> **If this is your first time using the device, we recommend referring to [Getting Started Guide](tutorials/beginner/getting-started.md) to start application development directly.**
 
 ## 📋 Prerequisites
 
@@ -377,6 +377,8 @@ After firmware flashing completes, you can:
 
 - [Development Environment Setup Guide](ENV_SETUP.en.md) - Development environment setup
 - [Application Development Guide](APPLICATION_DEVELOPMENT.en.md) - Application development getting started
+- [Firmware Development Guide](firmware/getting-started.md) - Firmware development introduction
+- [Troubleshooting](troubleshooting/common-issues.md) - Common problem resolution
 
 ## 📞 Get Help
 
@@ -384,7 +386,7 @@ If you encounter flashing issues:
 - 📖 Check the common issues section of this document
 - 💬 Ask questions on [GitHub Issues](https://github.com/Iam5stillLearning/OpenSource-Ai-Glasses/issues)
 - 📧 Send email to: iam5stilllearning@foxmail.com
-- 💡 Check the Common Issues section above
+- 💡 Check [Troubleshooting Documentation](troubleshooting/common-issues.md)
 
 ---
 
