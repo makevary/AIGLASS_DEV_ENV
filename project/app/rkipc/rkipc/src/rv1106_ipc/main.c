@@ -161,22 +161,29 @@ int main(int argc, char **argv) {
 	rk_param_init(rkipc_ini_path_);
 	rk_network_init(NULL);
 	rk_system_init();
-	if (rk_param_get_int("video.source:enable_npu", 0))
+	int video_uses_ai_core_stream = rk_video_uses_ai_core_stream();
+	int audio_uses_ai_core_stream = rk_audio_uses_ai_core_stream();
+	int need_local_mpi = !video_uses_ai_core_stream || !audio_uses_ai_core_stream;
+	if (!video_uses_ai_core_stream && rk_param_get_int("video.source:enable_npu", 0))
 		rkipc_rockiva_init();
-	if (rk_param_get_int("video.source:enable_aiq", 1)) {
+	if (!video_uses_ai_core_stream && rk_param_get_int("video.source:enable_aiq", 1)) {
 		rk_isp_init(0, rkipc_iq_file_path_);
 		if (rk_param_get_int("isp:init_from_ini", 1))
 			rk_isp_set_from_ini(0);
 	}
-	RK_MPI_SYS_Init();
+	if (need_local_mpi)
+		RK_MPI_SYS_Init();
+	else
+		LOG_INFO("video/audio source uses ai-core stream, skip local RK_MPI_SYS_Init\n");
 	rk_video_init();
 	if (rk_param_get_int("audio.0:enable", 0)) {
 		rkipc_audio_init();
-		if (!rk_audio_uses_ai_core_stream() && rkipc_holder_adapter_init() != 0)
+		if (!audio_uses_ai_core_stream && rkipc_holder_adapter_init() != 0)
 			LOG_ERROR("rkipc_holder_adapter_init failed\n");
 	}
 	rkipc_server_init();
-	rk_storage_init();
+	if (!video_uses_ai_core_stream)
+		rk_storage_init();
 	pthread_create(&key_chk, NULL, wait_key_event, NULL);
 
 	while (g_main_run_) {
@@ -185,19 +192,21 @@ int main(int argc, char **argv) {
 
 	// deinit
 	pthread_join(key_chk, NULL);
-	rk_storage_deinit();
+	if (!video_uses_ai_core_stream)
+		rk_storage_deinit();
 	rkipc_server_deinit();
 	rk_system_deinit();
 	rk_video_deinit();
-	if (rk_param_get_int("video.source:enable_aiq", 1))
+	if (!video_uses_ai_core_stream && rk_param_get_int("video.source:enable_aiq", 1))
 		rk_isp_deinit(0);
 	if (rk_param_get_int("audio.0:enable", 0)) {
-		if (!rk_audio_uses_ai_core_stream())
+		if (!audio_uses_ai_core_stream)
 			rkipc_holder_adapter_deinit();
 		rkipc_audio_deinit();
 	}
-	RK_MPI_SYS_Exit();
-	if (rk_param_get_int("video.source:enable_npu", 0))
+	if (need_local_mpi)
+		RK_MPI_SYS_Exit();
+	if (!video_uses_ai_core_stream && rk_param_get_int("video.source:enable_npu", 0))
 		rkipc_rockiva_deinit();
 	rk_network_deinit();
 	rk_param_deinit();

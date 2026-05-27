@@ -17,6 +17,8 @@ UVC_EN=off
 RNDIS_EN=off
 HID_EN=off
 
+USB_SERIAL_CID_FILE=/sys/block/mmcblk0/device/cid
+USB_SERIAL_SUFFIX_LEN=12
 USB_ATTRIBUTE=0x409
 USB_GROUP=rockchip
 USB_SKELETON=b.1
@@ -45,6 +47,21 @@ UVC_F_DIR=${UVC_STREAMING_DIR}/framebased/f/
 test_write()
 {
 	test -e $2 && echo $1 > $2
+}
+
+make_adb_serial()
+{
+	CID=`cat ${USB_SERIAL_CID_FILE} 2>/dev/null | tr -d '\r\n'`
+	if [ ${#CID} -lt ${USB_SERIAL_SUFFIX_LEN} ];then
+		echo "Error: invalid eMMC CID for USB serial: ${CID}"
+		exit 1
+	fi
+
+	SERIAL=`printf "%s\n" "$CID" | awk -v n="${USB_SERIAL_SUFFIX_LEN}" '{print substr($0, length($0) - n + 1)}'`
+	if [ ${#SERIAL} -ne ${USB_SERIAL_SUFFIX_LEN} ];then
+		echo "Error: failed to derive USB serial from eMMC CID: ${CID}"
+		exit 1
+	fi
 }
 
 function_init()
@@ -77,10 +94,7 @@ configfs_init()
 	echo 0x0310 > ${USB_CONFIGFS_DIR}/bcdDevice
 	echo 0x0200 > ${USB_CONFIGFS_DIR}/bcdUSB
 	mkdir ${USB_STRINGS_DIR}   -m 0770
-	SERIAL=`cat /proc/cpuinfo | grep Serial | awk '{print $3}'`
-	if [ -z $SERIAL ];then
-		SERIAL=0123456789ABCDEF
-	fi
+	make_adb_serial
 	echo $SERIAL > ${USB_STRINGS_DIR}/serialnumber
 	echo "rockchip"  > ${USB_STRINGS_DIR}/manufacturer
 	echo "rk3xxx"  > ${USB_STRINGS_DIR}/product
