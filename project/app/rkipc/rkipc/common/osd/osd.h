@@ -22,6 +22,7 @@ void rk_osd_bmp_change_callback_register(rk_osd_bmp_change_callback callback_ptr
 int rk_osd_init();
 int rk_osd_deinit();
 int rk_osd_restart();
+int rk_osd_privacy_mask_restart();
 int rk_osd_bmp_change(int osd_id);
 
 int fill_image(osd_data_s *data);
