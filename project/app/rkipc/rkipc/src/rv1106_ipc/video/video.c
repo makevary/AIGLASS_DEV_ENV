@@ -4,6 +4,7 @@
 
 #include "video.h"
 #include "audio.h"
+#include "ai_camera.h"
 #include "rockiva.h"
 
 #define HAS_VO 0
@@ -47,6 +48,8 @@ static int get_jpeg_cnt = 0;
 static int enable_ivs, enable_jpeg, enable_venc_0, enable_venc_1, enable_rtsp, enable_rtmp;
 static int g_enable_vo, g_vo_dev_id, g_vi_chn_id, enable_npu, enable_osd;
 static int g_video_run_ = 1;
+static int g_video_using_ai_core_stream_ = 0;
+static int g_ai_core_video_thread_started_ = 0;
 static int g_nn_osd_run_ = 0;
 static int pipe_id_ = 0;
 static int dev_id_ = 0;
@@ -61,10 +64,17 @@ static const char *tmp_gop_mode;
 static const char *tmp_rc_quality;
 static pthread_t vi_thread_1, venc_thread_0, venc_thread_1, venc_thread_2, jpeg_venc_thread_id,
     vpss_thread_rgb, cycle_snapshot_thread_id, get_nn_update_osd_thread_id,
-    get_vi_send_jpeg_thread_id, get_vi_2_send_thread, get_ivs_result_thread;
+    get_vi_send_jpeg_thread_id, get_vi_2_send_thread, get_ivs_result_thread,
+    ai_core_video_thread_0;
 
 static MPP_CHN_S vi_chn, vpss_bgr_chn, vpss_rotate_chn, vo_chn, vpss_out_chn[4], venc_chn, ivs_chn;
 static VO_DEV VoLayer = RK3588_VOP_LAYER_CLUSTER0;
+static const char *g_video_source_ai_core_h265_shm_ = "ai_core_h265_shm";
+
+int rk_video_uses_ai_core_stream(void) {
+	const char *source = rk_param_get_string("video.source:source", "local");
+	return source && !strcmp(source, g_video_source_ai_core_h265_shm_);
+}
 
 static void rkipc_video_update_latest_pts(int stream_id, int64_t pts) {
 	if (stream_id < 0 || stream_id >= 3)
@@ -86,6 +96,61 @@ int64_t rkipc_video_get_latest_pts(int stream_id) {
 	pthread_mutex_unlock(&g_video_pts_mutex_);
 
 	return pts;
+}
+
+static void *rkipc_get_ai_core_video_0(void *arg) {
+	(void)arg;
+	LOG_DEBUG("#Start %s thread\n", __func__);
+	prctl(PR_SET_NAME, "RkipcAiVideo0", 0, 0, 0);
+
+	while (g_video_run_) {
+		ai_video_stream_handle_t handle;
+		int ret = ai_video_stream_subscribe("rkipc/live0", &handle);
+		if (ret != AI_MEDIA_SUCCESS) {
+			LOG_ERROR("ai-core video stream subscribe failed ret=%d\n", ret);
+			usleep(1000 * 1000);
+			continue;
+		}
+
+		LOG_INFO("ai-core video stream subscribed\n");
+		int frame_count = 0;
+		while (g_video_run_) {
+			ai_video_stream_frame_t frame;
+			ret = ai_video_stream_read_frame(&handle, &frame, 1000);
+			if (ret == AI_MEDIA_SUCCESS) {
+				rkipc_video_update_latest_pts(0, frame.pts_us);
+				rkipc_rtsp_write_video_frame(0,
+				                             (unsigned char *)frame.data,
+				                             (unsigned int)frame.size,
+				                             frame.pts_us);
+				frame_count++;
+				if ((frame_count % 300) == 0) {
+					LOG_INFO("ai-core video frame count=%d seq=%llu pts=%llu size=%zu\n",
+					         frame_count,
+					         (unsigned long long)frame.seq,
+					         (unsigned long long)frame.pts_us,
+					         frame.size);
+				}
+				ai_video_stream_release_frame(&handle, &frame);
+				continue;
+			}
+
+			if (ret == AI_MEDIA_ERROR_TIMEOUT) {
+				continue;
+			}
+
+			LOG_ERROR("ai-core video stream read failed ret=%d\n", ret);
+			break;
+		}
+
+		ai_video_stream_unsubscribe(&handle);
+		LOG_INFO("ai-core video stream unsubscribed\n");
+		if (g_video_run_) {
+			usleep(500 * 1000);
+		}
+	}
+
+	return NULL;
 }
 
 typedef enum rkCOLOR_INDEX_E {
@@ -3103,9 +3168,11 @@ int rk_video_init() {
 	enable_venc_1 = rk_param_get_int("video.source:enable_venc_1", 1);
 	enable_rtsp = rk_param_get_int("video.source:enable_rtsp", 1);
 	enable_rtmp = rk_param_get_int("video.source:enable_rtmp", 1);
+	g_video_using_ai_core_stream_ = rk_video_uses_ai_core_stream();
 	LOG_INFO("enable_jpeg is %d, enable_venc_0 is %d, enable_venc_1 is %d, enable_rtsp is %d, "
-	         "enable_rtmp is %d\n",
-	         enable_jpeg, enable_venc_0, enable_venc_1, enable_rtsp, enable_rtmp);
+	         "enable_rtmp is %d, ai_core_video_stream is %d\n",
+	         enable_jpeg, enable_venc_0, enable_venc_1, enable_rtsp, enable_rtmp,
+	         g_video_using_ai_core_stream_);
 
 	g_vi_chn_id = rk_param_get_int("video.source:vi_chn_id", 0);
 	g_enable_vo = rk_param_get_int("video.source:enable_vo", 1);
@@ -3116,6 +3183,19 @@ int rk_video_init() {
 	          "enable_osd is %d\n",
 	          g_vi_chn_id, g_enable_vo, g_vo_dev_id, enable_npu, enable_osd);
 	g_video_run_ = 1;
+	if (g_video_using_ai_core_stream_) {
+		if (enable_rtsp)
+			ret |= rkipc_rtsp_init(RTSP_URL_0, NULL, NULL);
+		if (pthread_create(&ai_core_video_thread_0, NULL, rkipc_get_ai_core_video_0, NULL) == 0) {
+			g_ai_core_video_thread_started_ = 1;
+		} else {
+			LOG_ERROR("create ai-core video stream thread failed\n");
+			ret |= RK_FAILURE;
+		}
+		LOG_DEBUG("over using ai-core video stream\n");
+		return ret;
+	}
+
 	ret |= rkipc_vi_dev_init();
 	if (enable_rtsp)
 		ret |= rkipc_rtsp_init(RTSP_URL_0, RTSP_URL_1, NULL);
@@ -3154,6 +3234,17 @@ int rk_video_deinit() {
 	g_video_latest_pts_[2] = -1;
 	pthread_mutex_unlock(&g_video_pts_mutex_);
 	int ret = 0;
+	if (g_video_using_ai_core_stream_) {
+		if (g_ai_core_video_thread_started_) {
+			pthread_join(ai_core_video_thread_0, NULL);
+			g_ai_core_video_thread_started_ = 0;
+		}
+		if (enable_rtsp)
+			ret |= rkipc_rtsp_deinit();
+		g_video_using_ai_core_stream_ = 0;
+		return ret;
+	}
+
 	if (enable_npu || enable_ivs)
 		ret |= rkipc_pipe_2_deinit();
 	// rk_region_clip_set_callback_register(NULL);
@@ -3185,13 +3276,16 @@ int rk_video_deinit() {
 extern char *rkipc_iq_file_path_;
 int rk_video_restart() {
 	int ret;
-	ret = rk_storage_deinit();
+	int video_uses_ai_core_stream = rk_video_uses_ai_core_stream();
+	ret = 0;
+	if (!video_uses_ai_core_stream)
+		ret |= rk_storage_deinit();
 	if (rk_param_get_int("audio.0:enable", 0))
 		rkipc_audio_deinit();
 	ret |= rk_video_deinit();
-	if (rk_param_get_int("video.source:enable_aiq", 1))
+	if (!video_uses_ai_core_stream && rk_param_get_int("video.source:enable_aiq", 1))
 		ret |= rk_isp_deinit(0);
-	if (rk_param_get_int("video.source:enable_aiq", 1)) {
+	if (!video_uses_ai_core_stream && rk_param_get_int("video.source:enable_aiq", 1)) {
 		ret |= rk_isp_init(0, rkipc_iq_file_path_);
 		if (rk_param_get_int("isp:init_from_ini", 1))
 			ret |= rk_isp_set_from_ini(0);
@@ -3199,7 +3293,8 @@ int rk_video_restart() {
 	ret |= rk_video_init();
 	if (rk_param_get_int("audio.0:enable", 0))
 		rkipc_audio_init();
-	ret |= rk_storage_init();
+	if (!video_uses_ai_core_stream)
+		ret |= rk_storage_init();
 
 	return ret;
 }

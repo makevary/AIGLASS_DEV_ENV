@@ -28,6 +28,7 @@
 
 int rk_video_init();
 int rk_video_deinit();
+int rk_video_uses_ai_core_stream(void);
 int rk_video_restart();
 int rk_video_get_gop(int stream_id, int *value);
 int rk_video_set_gop(int stream_id, int value);

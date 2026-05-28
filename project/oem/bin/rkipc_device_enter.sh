@@ -107,6 +107,24 @@ prepare_ini() {
 		sed -i '/^\[audio\.0\]/a source = ai_core_mirror' /tmp/rkipc-test.ini
 	fi
 
+	set_video_source_key() {
+		key="$1"
+		value="$2"
+		if sed -n '/^\[video\.source\]/,/^\[/{/^[[:space:]]*'"$key"' *=/p;}' /tmp/rkipc-test.ini | grep -q .; then
+			sed -i '/^\[video\.source\]/,/^\[/{s/^[[:space:]]*'"$key"' *=.*/'"$key"' = '"$value"'/;}' /tmp/rkipc-test.ini
+		elif grep -q '^\[video\.source\]' /tmp/rkipc-test.ini; then
+			sed -i '/^\[video\.source\]/a '"$key"' = '"$value"'' /tmp/rkipc-test.ini
+		fi
+	}
+
+	set_video_source_key source ai_core_h265_shm
+	set_video_source_key enable_ivs 0
+	set_video_source_key enable_jpeg 0
+	set_video_source_key enable_venc_0 0
+	set_video_source_key enable_venc_1 0
+	set_video_source_key enable_venc_2 0
+	set_video_source_key enable_npu 0
+
 	if sed -n '/^\[video\.source\]/,/^\[/{/^[[:space:]]*enable_rtmp *=/p;}' /tmp/rkipc-test.ini | grep -q .; then
 		sed -i '/^\[video\.source\]/,/^\[/{s/^[[:space:]]*enable_rtmp *=.*/enable_rtmp = 0/;}' /tmp/rkipc-test.ini
 	elif grep -q '^\[video\.source\]' /tmp/rkipc-test.ini; then
@@ -121,6 +139,7 @@ prepare_ini() {
 
 	grep -n 'init_from_ini' /tmp/rkipc-test.ini || true
 	grep -n 'source *= *ai_core_mirror' /tmp/rkipc-test.ini || true
+	grep -n 'source *= *ai_core_h265_shm' /tmp/rkipc-test.ini || true
 	grep -n 'enable_rtmp *= *0' /tmp/rkipc-test.ini || true
 }
 
