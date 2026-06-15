@@ -4,7 +4,7 @@
 
 ## Introduction
 
-This SDK provides a complete client development kit for AI Core Service, supporting GPIO event subscription and camera access functions.
+This SDK provides a complete client development kit for AI Core Service, supporting GPIO event subscription, camera access, audio playback, display submission, text event listening, and BLE text messaging.
 
 Note: the current release package contains headers, prebuilt libraries, and examples only. It does not ship a `src/` directory, so examples should link against `lib/libai_glass_sdk.a` or `lib/libai_glass_sdk.so`.
 
@@ -17,6 +17,9 @@ ai_glass_sdk/
 │   ├── ai_ipc.h                   # IPC communication API
 │   ├── ai_camera.h                # Camera client API
 │   ├── ai_audio.h                 # Audio client API
+│   ├── ai_display.h               # Display client API
+│   ├── ai_text_event.h            # Text event client API
+│   ├── ai_ble.h                   # BLE text message client API
 │   └── ai_log.h                   # Log system API
 ├── lib/                  # Compiled library files
 │   ├── libai_glass_sdk.a          # Static library
@@ -25,11 +28,14 @@ ai_glass_sdk/
 │   ├── gpio_example/              # GPIO event client example
 │   ├── audio_play_example/        # Audio play client example
 │   ├── camera_capture_example/    # Camera client example
-│   └── text_event_example/        # ASR/LLM text event example
+│   ├── text_event_example/        # ASR/LLM text event example
+│   └── ble_demo/                  # BLE Android/glasses roundtrip demo
 ├── docs/                 # Client integration documentation
-│   ├── GPIO_Event_Service.md      # GPIO event service full documentation
+│   ├── GPIO_Client_API.md         # GPIO client API documentation
 │   ├── Camera_Client_API.md       # Camera client API documentation
-│   └── Audio_Client_API.md        # Audio client API documentation
+│   ├── Audio_Client_API.md        # Audio client API documentation
+│   ├── BLE_Client_API.md          # BLE text message client API documentation
+│   └── Log_API.md                 # Log API documentation
 ├── README.md             # This file
 └── VERSION               # Version information
 ```
@@ -51,6 +57,11 @@ ai_glass_sdk/
 - Supports volume adjustment, sample rate configuration
 - Force play and stop functions
 
+### 4. BLE Text Messaging
+- Access BLE through the local Unix Socket exposed by `bt_service`
+- Local applications subscribe to messages by `datatype`
+- Both mobile and device sides use UTF-8 JSON text packets
+
 ## 🚀 Quick Start
 
 ### 1. Build Example Programs
@@ -61,6 +72,7 @@ cd ai_glass_sdk/examples/gpio_example && make
 cd ../audio_play_example && make
 cd ../camera_capture_example && make
 cd ../text_event_example && make
+cd ../ble_demo && make
 ```
 
 ### 2. Run Example Programs
@@ -93,6 +105,18 @@ cd examples/camera_capture_example
 # Play audio file
 cd examples/audio_play_example
 ./../build/audio_play_example -f /path/to/audio.pcm -v 80 -r 48000
+```
+
+#### BLE Roundtrip Demo
+```bash
+# Make sure bt_service is running and /var/run/ai_ble.sock exists
+cd examples/ble_demo
+make
+./../build/ble_demo
+
+# Android side: scan OSAIG-XXXX, send sdk.demo.ping, and display sdk.demo.pong
+cd android
+bash build_android.sh
 ```
 
 ### 3. Integrate into Your Project
@@ -185,6 +209,16 @@ int main() {
 | `log_debug()` | Output debug level log (with millisecond timestamp) |
 | `log_warn()` | Output warn level log (with millisecond timestamp) |
 
+### BLE Text Message Client API
+
+| API Function | Description |
+|---------|------|
+| `ai_ble_client_create()` | Create a BLE text client |
+| `ai_ble_client_start()` | Connect to the local BLE router and start the receive thread |
+| `ai_ble_register_datatype()` | Register the target `datatype` |
+| `ai_ble_send()` | Send a BLE text message |
+| `ai_ble_client_destroy()` | Stop and destroy the client |
+
 ## 📚 Documentation Index
 
 ### Core API Documentation
@@ -193,6 +227,7 @@ int main() {
 | [GPIO_Client_API.en.md](docs/GPIO_Client_API.en.md) | GPIO Client API Full Documentation (Event Subscription, Async Callback) |
 | [Camera_Client_API.en.md](docs/Camera_Client_API.en.md) | Camera Client API Documentation (Zero-copy Image Capture) |
 | [Audio_Client_API.en.md](docs/Audio_Client_API.en.md) | Audio Client API Documentation (Audio Playback Control) |
+| [BLE_Client_API.en.md](docs/BLE_Client_API.en.md) | BLE Text Message Client API Documentation (datatype subscription and sending) |
 | [Log_API.en.md](docs/Log_API.en.md) | Log System API Documentation (Unified Log Output, Millisecond Timestamp) |
 
 ### Example Program Documentation
@@ -202,6 +237,7 @@ int main() {
 | [Camera Client Example](examples/camera_capture_example/) | Image Capture Full Example |
 | [Audio Playback Client Example](examples/audio_play_example/) | PCM Playback and TTS Function Detailed Example |
 | [Text Event Client Example](examples/text_event_example/) | Receive and print ASR/LLM text events |
+| [BLE Roundtrip Demo](examples/ble_demo/) | Android and glasses-side BLE text roundtrip example |
 
 ## ⚙️ Prerequisites
 

@@ -4,7 +4,7 @@
 
 ## 简介
 
-本SDK为AI Core Service提供完整的客户端开发套件，支持GPIO事件订阅和摄像头调用功能。
+本 SDK 为 AI Core Service 提供完整的客户端开发套件，支持 GPIO 事件订阅、摄像头调用、音频播放、显示提交、文本事件监听和 BLE 文本消息收发。
 
 说明：当前发布包为“头文件 + 预编译库 + 示例程序”形态，不包含 `src/` 源码目录；示例程序应直接链接 `lib/libai_glass_sdk.a` 或 `lib/libai_glass_sdk.so`。
 
@@ -15,8 +15,11 @@ ai_glass_sdk/
 ├── include/              # 头文件
 │   ├── ai_gpio.h                  # GPIO事件客户端API
 │   ├── ai_ipc.h                   # IPC通信API
-│   ├── ai_camera.h          # 摄像头客户端API
+│   ├── ai_camera.h                # 摄像头客户端API
 │   ├── ai_audio.h                 # 音频客户端API
+│   ├── ai_display.h               # 显示客户端API
+│   ├── ai_text_event.h            # 文本事件客户端API
+│   ├── ai_ble.h                   # BLE 文本消息客户端API
 │   └── ai_log.h                   # 日志系统API
 ├── lib/                  # 编译后的库文件
 │   ├── libai_glass_sdk.a           # 静态库
@@ -25,11 +28,14 @@ ai_glass_sdk/
 │   ├── gpio_example/              # GPIO事件客户端示例
 │   ├── audio_play_example/        # 音频播放客户端示例
 │   ├── camera_capture_example/    # 摄像头客户端示例
-│   └── text_event_example/        # ASR/LLM文本事件示例
+│   ├── text_event_example/        # ASR/LLM文本事件示例
+│   └── ble_demo/                  # BLE 手机端/眼镜端往返示例
 ├── docs/                 # 客户端接入文档
-│   ├── GPIO_Event_Service.md           # GPIO事件服务完整文档
+│   ├── GPIO_Client_API.md              # GPIO客户端API文档
 │   ├── Camera_Client_API.md            # 摄像头客户端API文档
-│   └── Audio_Client_API.md             # 音频客户端API文档
+│   ├── Audio_Client_API.md             # 音频客户端API文档
+│   ├── BLE_Client_API.md               # BLE 文本消息客户端API文档
+│   └── Log_API.md                      # 日志系统API文档
 ├── README.md            # 本文件
 └── VERSION              # 版本信息
 ```
@@ -51,6 +57,11 @@ ai_glass_sdk/
 - 支持音量调节、采样率配置
 - 强制播放和停止功能
 
+### 4. BLE 文本消息
+- 通过 `bt_service` 暴露的本地 Unix Socket 接入 BLE 能力
+- 本地应用按 `datatype` 注册和接收消息
+- 手机与设备双向统一使用 UTF-8 JSON 文本包
+
 ## 🚀 快速开始
 
 ### 1. 编译示例程序
@@ -61,6 +72,7 @@ cd ai_glass_sdk/examples/gpio_example && make
 cd ../audio_play_example && make
 cd ../camera_capture_example && make
 cd ../text_event_example && make
+cd ../ble_demo && make
 ```
 
 ### 2. 运行示例程序
@@ -93,6 +105,18 @@ cd examples/camera_capture_example
 # 播放音频文件
 cd examples/audio_play_example
 ./../build/audio_play_example -f /path/to/audio.pcm -v 80 -r 48000
+```
+
+#### BLE 往返 Demo
+```bash
+# 确保 bt_service 已启动并创建 /var/run/ai_ble.sock
+cd examples/ble_demo
+make
+./../build/ble_demo
+
+# Android 端示例：扫描 OSAIG-XXXX，发送 sdk.demo.ping 并显示 sdk.demo.pong
+cd android
+bash build_android.sh
 ```
 
 ### 3. 集成到自己的项目
@@ -185,6 +209,16 @@ int main() {
 | `log_debug()` | 输出调试级别日志（带毫秒级时间戳） |
 | `log_warn()` | 输出警告级别日志（带毫秒级时间戳） |
 
+### BLE 文本消息客户端 API
+
+| API函数 | 说明 |
+|---------|------|
+| `ai_ble_client_create()` | 创建 BLE 文本客户端 |
+| `ai_ble_client_start()` | 连接本地 BLE 路由服务并启动接收线程 |
+| `ai_ble_register_datatype()` | 注册要接收的 `datatype` |
+| `ai_ble_send()` | 发送 BLE 文本消息 |
+| `ai_ble_client_destroy()` | 停止并销毁客户端 |
+
 ## 📚 文档索引
 
 ### 核心API文档
@@ -193,6 +227,7 @@ int main() {
 | [GPIO_Client_API.md](docs/GPIO_Client_API.md) | GPIO客户端API完整文档（事件订阅、异步回调） |
 | [Camera_Client_API.md](docs/Camera_Client_API.md) | 摄像头客户端API文档（零拷贝图像捕获） |
 | [Audio_Client_API.md](docs/Audio_Client_API.md) | 音频客户端API文档（音频播放控制） |
+| [BLE_Client_API.md](docs/BLE_Client_API.md) | BLE 文本消息客户端API文档（datatype 订阅与发送） |
 | [Log_API.md](docs/Log_API.md) | 日志系统API文档（统一日志输出、毫秒级时间戳） |
 
 ### 示例程序文档
@@ -202,6 +237,7 @@ int main() {
 | [摄像头客户端示例](examples/camera_capture_example/) | 图像捕获完整示例 |
 | [音频播放客户端示例](examples/audio_play_example/) | PCM播放和TTS功能详细示例 |
 | [文本事件客户端示例](examples/text_event_example/) | 接收并打印 ASR/LLM 文本事件 |
+| [BLE 往返 Demo](examples/ble_demo/) | Android 端和眼镜端 BLE 文本往返示例 |
 
 ## ⚙️ 前置条件
 
