@@ -3,7 +3,7 @@
 export RK96X_TARGET_PATH=/userdata/rx96x
 export DBUS_SYSTEM_BUS_ADDRESS='unix:path=/var/run/dbus/system_bus_socket'
 export LD_LIBRARY_PATH=/oem/usr/lib:$LD_LIBRARY_PATH
-DBUS_COMPAT_ROOT=/home/xjy/Downloads/bluez-5.66/bluez_output
+DBUS_COMPAT_ROOT=/run/dbus-compat
 DBUS_PID=/run/messagebus.pid
 DBUS_SOCKET=/run/dbus/system_bus_socket
 

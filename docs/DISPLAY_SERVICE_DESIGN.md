@@ -17,11 +17,11 @@
 
 ### 1. 架构模式：客户端渲染 (Client-Side Rendering)
 
-- **Client (App)**:
+- **Client (App)**: 
     - 静态链接 `liblvgl`。
     - 运行独立的 LVGL 主循环。
     - 自定义 `disp_drv`，将 `flush_cb` 指向共享内存。
-- **Service (Server)**:
+- **Service (Server)**: 
     - **不运行** LVGL 绘图逻辑。
     - 仅作为 "Display Server/Compositor"。
     - 监听共享内存状态，将 Ready 的帧通过 SPI 发送给屏幕。
@@ -44,36 +44,36 @@ graph TB
         S1[SDK: ai_display_commit]
         L1 --> D1 --> S1
     end
-
+    
     subgraph Client_Process_B [Translate App]
         L2[LVGL Engine]
         D2[Custom Display Driver]
         S2[SDK: ai_display_commit]
         L2 --> D2 --> S2
     end
-
+    
     subgraph Shared_Memory [共享内存区域]
         FB1[App A FrameBuffer]
         FB2[App B FrameBuffer]
     end
-
+    
     subgraph Service_Process [Display Service]
         M[Frame Compositor<br>混合/仲裁]
         HAL[SPI Driver]
     end
-
+    
     subgraph Hardware
         Screen[640x480 OLED]
     end
-
+    
     S1 -->|Write| FB1
     S2 -->|Write| FB2
     S1 -->|IPC Notify| M
     S2 -->|IPC Notify| M
-
+    
     FB1 -.->|Read| M
     FB2 -.->|Read| M
-
+    
     M --> HAL --> Screen
 ```
 
@@ -102,7 +102,7 @@ uint8_t* ai_display_get_framebuffer(ai_display_client_t *client);
  * @param area  更新区域 (x, y, w, h)，支持局部刷新优化
  * 告诉服务端：我画好了，请把数据发给屏幕
  */
-int ai_display_commit_frame(ai_display_client_t *client,
+int ai_display_commit_frame(ai_display_client_t *client, 
                             int x, int y, int w, int h);
 
 
@@ -128,13 +128,13 @@ uint8_t* shm_buf = ai_display_get_framebuffer(client);
 void my_flush_cb(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p) {
     // 因为我们是直接渲染到共享内存 shm_buf 的，所以这里不需要 memcpy
     // 只需要通知服务端刷新即可
-
-    ai_display_commit_frame(client,
-        area->x1, area->y1,
-        area->x2 - area->x1 + 1,
+    
+    ai_display_commit_frame(client, 
+        area->x1, area->y1, 
+        area->x2 - area->x1 + 1, 
         area->y2 - area->y1 + 1
     );
-
+    
     lv_disp_flush_ready(disp_drv);
 }
 
@@ -152,12 +152,12 @@ lv_disp_draw_buf_init(&draw_buf, shm_buf, NULL, 640 * 480);
 typedef struct {
     // 状态头
     volatile int active_client_pid;  // 当前正在显示哪个进程
-
+    
     // 帧缓冲 (640 * 480 / 2 = 153,600 bytes)
     // 预留两个槽位，支持两个应用同时运行（例如主应用+通知）
-    uint8_t framebuffer_slot_0[153600];
+    uint8_t framebuffer_slot_0[153600]; 
     uint8_t framebuffer_slot_1[153600];
-
+    
 } ai_display_shm_t;
 ```
 

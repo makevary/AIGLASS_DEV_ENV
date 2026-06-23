@@ -3,6 +3,7 @@ set -eE
 
 export LC_ALL=C
 export LD_LIBRARY_PATH=
+export CMAKE_POLICY_VERSION_MINIMUM=${CMAKE_POLICY_VERSION_MINIMUM:-3.5}
 RECORD_IFS="$IFS"
 
 function unset_env_config_rk()
